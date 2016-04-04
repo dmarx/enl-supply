@@ -1,0 +1,42 @@
+# Datamodel
+
+
+class User
+    -- main profile
+    guid
+    email
+    #authtoken (or whatever for oauth2
+    ingress username/groupme name/telegram name
+    
+    -- network graph
+    confirmed_neighbors
+    suggested_neighbors # This probably doesn't need to be attached directly to the user object
+    edges # paths with costs associated
+    
+    -- inventory profile
+    active # Need better word for this. denotes if user is currently willing to participate in gear transfers
+    live_inventory # foreign key to inventory items
+    open_requests  # suggestsed exchanges
+    live_promises  # foreign key to promises items
+    
+class Inventory
+    guid
+    item_type
+    value
+    registration_date # Date inventory was registered.
+    time_to_live/ttl  # amount of time from now until expiration_date. Attribute calculated on the fly.
+    expiration_date   # date at which item will exipre
+    expiration        # fixed parameter, time until it expires
+    
+class Promise
+    guid
+    source
+    target
+    item
+    value
+    fulfilled
+    registration_date # Date inventory was registered.
+    time_to_live/ttl  # amount of time from now until expiration_date. Attribute calculated on the fly.
+    expiration_date   # date at which item will exipre
+    expiration        # fixed parameter, time until it expires
+    
