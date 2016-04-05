@@ -202,8 +202,10 @@ class Inventory(SimpleNode):
         return self.node
         
     def set(self, type, value, level=None):
-        if value==0:
-            self.delete(type, value, level)
+        print type, value, level
+        if value=='0':
+            print "calling Inventory.delete"
+            self.delete(type, level)
             return
         self.find() # Make sure relevant node in dictionary hasn't been deleted?
         k = (type,level)
@@ -217,11 +219,19 @@ class Inventory(SimpleNode):
             graph.create(Relationship(self.usernode,'HAS',node))
     
     def delete(self, type, level=None):
+        print "deleting node"
         k = (type,level)
         if self.nodes.has_key(k):
             node = self.nodes.pop(k)
-            graph.delete(node)
-
+            #graph.delete(node)
+            query = """
+            MATCH (n:Inventory)<-[:HAS]-(u:User)
+            WHERE u.username = {username}
+            AND   n.type = {type}
+            AND   n.level = {level}
+            DETACH DELETE n
+            """
+            graph.cypher.execute(query, username=self.username, type=type, level=level)
         
         
 if __name__ == '__main__':
