@@ -3,10 +3,24 @@ from flask import Flask, request, session, redirect, url_for, render_template, f
 
 app = Flask(__name__)
 
+# Is there any reason why Nicole doesn't attach the User object to the session?
+# Seems like it would reduce requests to the database if we keep a pointer to
+# the bound user node instead of querying the database every time we want it.
+
 @app.route('/')
 def index():
     print "serving index"
-    return render_template('index.html')
+    inventory = None
+    if session.has_key('username'):
+        username = session['username']
+        #user = User(username)
+        #print type(user)
+        #inventory = [(n.type, n.level, n.value) for n in User.inventory.nodes]
+        
+        #inventory = [(n.type, n.level, n.value) for n in Inventory(username).nodes]
+        inventory = [{'type':k[0], 'level':k[1], 'value':v} for k,v in Inventory(username).nodes.iteritems()]
+        print "inventory at index:", inventory
+    return render_template('index.html', inventory=inventory)
     
 @app.route('/register', methods=['GET','POST'])
 def register():
