@@ -56,7 +56,8 @@ class SimpleNode(object):
 
 class User(SimpleNode):
     def __init__(self, username):
-        self.username = username
+        self.displayname = username
+        self.username = username.lower()
         self.pk_name = "username"
         self.inventory = Inventory(username)
     # This is necessary to make sure inherited functions don't break
@@ -67,6 +68,7 @@ class User(SimpleNode):
     def register(self, password):
         user = graph.merge_one("User", "username", self.username)
         if not user['password']:
+            user['displayname'] = self.displayname
             user['password'] = bcrypt.encrypt(password)
             graph.push(user)
             self._node = user
@@ -100,6 +102,8 @@ class User(SimpleNode):
         if not type(target) == Node:
             target = graph.merge_one("User", "username", target)    
         rel = graph.match_one(source, "CAN_REACH", target)
+        if rel is None:
+            rel=[] # this shouldn't be necessary...
         if len(list(rel)) > 0 and override: # via http://stackoverflow.com/questions/26747441/py2neo-how-to-check-if-a-relationship-exists
             rel['cost'] = cost
             rel['verified'] = verified
@@ -120,9 +124,7 @@ class User(SimpleNode):
         """
         if cost is None:
             cost = default_cost
-        # Create the forward relationship using the client-set parameters
         self.set_user_relationship(source=self.node, target=user, cost=cost, verified=True, override=True)
-        # Create the reverse relationship using default parameters
         self.set_user_relationship(source=user, target=self.node, cost=default_cost, verified=False, override=False)
         
     def add_community_membership(self, community):
