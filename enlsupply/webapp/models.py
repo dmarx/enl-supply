@@ -131,23 +131,31 @@ class User(SimpleNode):
         graph.create_unique(rel)
         
     # Can I generalize this?
-    def verified_neighbors(self, radius=1):
+    def neighbors(self, radius=1):
         query = """
-        MATCH (user:User)-[r:CAN_REACH*1..{radius}]-(b:User)
+        MATCH (user:User)-[path:CAN_REACH*1..{radius}]-(neighbor:User)
         WHERE user.username = {{username}}
-        AND r.verified = TRUE
-        RETURN b, r
-        """.format(radius)
+        RETURN neighbor, path
+        """.format(radius=radius)
         return graph.cypher.execute(query, username=self.username)
         
-    def unverified_neighbors(self, radius=1):
+    def verified_neighbors(self):
         query = """
-        MATCH (user:User)-[r:CAN_REACH*1..{radius}]-(b:User)
+        MATCH (user:User)-[path:CAN_REACH]-(neighbor:User)
+        WHERE user.username = {username}
+        AND path.verified = TRUE
+        RETURN neighbor, path
+        """
+        return graph.cypher.execute(query, username=self.username)
+        
+    def unverified_neighbors(self):
+        query = """
+        MATCH (user:User)-[r:CAN_REACH]-(b:User)
         WHERE user.username = {username}
         AND r.verified = FALSE
         RETURN b, r
         """
-        return graph.cypher.execute(query, username=self.username, radius=radius)
+        return graph.cypher.execute(query, username=self.username)
         
     def suggest_neighbors_by_community(self, limit):
         query="""

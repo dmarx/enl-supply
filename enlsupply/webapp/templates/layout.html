@@ -7,11 +7,14 @@
   {% if session.username %}
     Logged in as {{ session.username }}
   {% endif %}
-  <a href="{{ url_for('index') }}">Home</a>
+  
   {% if not session.username %}
+    <a href="{{ url_for('index') }}">Home</a>
     <a href="{{ url_for('register') }}">Register</a>
     <a href="{{ url_for('login') }}">Login</a>
   {% else %}
+    <a href="{{ url_for('index') }}">Inventory</a>
+    <a href="{{ url_for('connections') }}">Connections</a>
     <a href="{{ url_for('logout') }}">Logout</a>
   {% endif %}
   </div>

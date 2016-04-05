@@ -14,6 +14,15 @@ def index():
         username = session['username']
         inventory = [{'type':k[0], 'level':k[1], 'value':v['value']} for k,v in Inventory(username).nodes.iteritems()]
     return render_template('index.html', inventory=inventory)
+
+@app.route('/connections')
+def connections():
+    verified_neighbors = None
+    if session.has_key('username'):
+        user = User(session['username'])
+        verified_neighbors = [neighbor for neighbor,_ in user.verified_neighbors()]
+    return render_template('connections.html', verified_neighbors=verified_neighbors)
+
     
 @app.route('/register', methods=['GET','POST'])
 def register():

@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block body %}
+  {% if session.username %}
+    <ul>
+    {% for agent in verified_neighbors %}
+      <li> {{ agent.username }} </li>
+    {% else %}
+      You currently are not connected to any other agents. Register connections
+      to agents you can easily meet with for gear exchange suggestions.
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endblock %}
