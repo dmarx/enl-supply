@@ -172,17 +172,19 @@ class User(SimpleNode):
 #I'm pretty sure there's a better way I could implement this on the python side.
 # Feels fine on the database side, but the class api smells funny.
 class Inventory(SimpleNode):
-    types = ['xmp', # XMP
-                  'res', # Resonator
-                  'fa',  # Force Amp
-                  'tur', # Turret
-                  'us',  # Ultra Strike
-                  'sh']  # Shield
+    types =  ['xmp', # XMP
+              'res', # Resonator
+              'fa',  # Force Amp
+              'tur', # Turret
+              'us',  # Ultra Strike
+              'sh']  # Shield
+    
     
     def __init__(self, username):
         self.username = username
         self.usernode = graph.find_one('User', 'username', username)
         self._node = {}
+    
     def find(self):
         query = """
         MATCH (user:User)-[r:HAS]->(b:Item)
@@ -194,9 +196,11 @@ class Inventory(SimpleNode):
         for node in nodes:
             d[(node.type, node.level)] = node
         self._node = d
+    
     @property
     def nodes(self):
         return self.node
+        
     def set(self, type, value, level=None):
         if value==0:
             self.delete(type, value, level)
