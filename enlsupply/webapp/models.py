@@ -32,8 +32,8 @@ class SimpleNode(object):
     def nodetype(self):
         return str(self.__class__).split('.')[-1][:-2]
     def find(self):
-        user = graph.find_one(self.nodetype, self.pk_name, self.pk)
-        return user
+        node = graph.find_one(self.nodetype, self.pk_name, self.pk)
+        return node
     @staticmethod
     def new_guid():
         return ''.join(str(uuid.uuid4()).split('-'))
@@ -58,7 +58,7 @@ class User(SimpleNode):
     def __init__(self, username):
         self.username = username
         self.pk_name = "username"
-    
+        self.inventory = Inventory(username)
     # This is necessary to make sure inherited functions don't break
     @property
     def pk(self):
@@ -99,7 +99,7 @@ class User(SimpleNode):
             source = graph.merge_one("User", "username", source)
         if not type(target) == Node:
             target = graph.merge_one("User", "username", target)    
-        rel = graph.match(source, "CAN_REACH", target)
+        rel = graph.match_one(source, "CAN_REACH", target)
         if len(list(rel)) > 0 and override: # via http://stackoverflow.com/questions/26747441/py2neo-how-to-check-if-a-relationship-exists
             rel['cost'] = cost
             rel['verified'] = verified
@@ -167,16 +167,59 @@ class User(SimpleNode):
         RETURN b, r
         """
         return graph.cypher.execute(query, username=self.username)
-        
-    def inventory(self):
+
+
+#I'm pretty sure there's a better way I could implement this on the python side.
+# Feels fine on the database side, but the class api smells funny.
+class Inventory(SimpleNode):
+    types = ['xmp', # XMP
+                  'res', # Resonator
+                  'fa',  # Force Amp
+                  'tur', # Turret
+                  'us',  # Ultra Strike
+                  'sh']  # Shield
+    
+    def __init__(self, username):
+        self.username = username
+        self.usernode = graph.find_one('User', 'username', username)
+        self._node = {}
+    def find(self):
         query = """
         MATCH (user:User)-[r:HAS]->(b:Item)
         WHERE user.username = {username}
         RETURN b
         """
-        return graph.cypher.execute(query, username=self.username)
+        d={}
+        nodes = graph.cypher.execute(query, username=self.username)
+        for node in nodes:
+            d[(node.type, node.level)] = node
+        self._node = d
+    @property
+    def nodes(self):
+        return self.node
+    def set(self, type, value, level=None):
+        if value==0:
+            self.delete(type, value, level)
+            return
+        self.find() # Make sure relevant node in dictionary hasn't been deleted?
+        k = (type,level)
+        if self.nodes.has_key(k):
+            node = self.nodes[k]
+            node.value = value
+            graph.push(node)
+        else:
+            node = Node('Inventory',type=type,value=value,level=level,id=self.new_guid())
+            self.nodes[k] = node
+            graph.create(Relationship(self.usernode,'HAS',node))
+    
+    def delete(self, type, level=None):
+        k = (type,level)
+        if self.nodes.has_key(k):
+            node = self.nodes.pop(k)
+            graph.delete(node)
 
-
+        
+        
 if __name__ == '__main__':
     # These are basically all tests and should be handled by nose. I'll port this later.
     pwd = 'fakepass'
@@ -190,3 +233,4 @@ if __name__ == '__main__':
     #user.is_active
     
     user.add_verified_relationship('msdaphne', cost=1)
+    user.inventory.set(type='xmp', level=8, value=100)
