@@ -9,17 +9,10 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    print "serving index"
     inventory = None
     if session.has_key('username'):
         username = session['username']
-        #user = User(username)
-        #print type(user)
-        #inventory = [(n.type, n.level, n.value) for n in User.inventory.nodes]
-        
-        #inventory = [(n.type, n.level, n.value) for n in Inventory(username).nodes]
         inventory = [{'type':k[0], 'level':k[1], 'value':v['value']} for k,v in Inventory(username).nodes.iteritems()]
-        print "inventory at index:", inventory
     return render_template('index.html', inventory=inventory)
     
 @app.route('/register', methods=['GET','POST'])
@@ -52,7 +45,6 @@ def login():
         else:
             session['username'] = username
             flash('Logged in.')
-            print "Logged in, redirecting to index"
             return redirect(url_for('index'))
 
     return render_template('login.html')

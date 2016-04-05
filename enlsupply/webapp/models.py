@@ -179,13 +179,11 @@ class Inventory(SimpleNode):
               'us',  # Ultra Strike
               'sh']  # Shield
     
-    
     def __init__(self, username):
         self.username = username
         self.usernode = graph.find_one('User', 'username', username)
     
     def find(self):
-        print "Refreshing inventory dict"
         query = """
         MATCH (user:User)-[r:HAS]->(b:Inventory)
         WHERE user.username = {username}
@@ -196,7 +194,6 @@ class Inventory(SimpleNode):
         for record in results:
             node = record[0]
             d[(node['type'], node['level'])] = node
-        #self._node = d
         return d
     
     @property
@@ -204,9 +201,7 @@ class Inventory(SimpleNode):
         return self.node
         
     def set(self, type, value, level=None):
-        print type, value, level
         if value=='0':
-            print "calling Inventory.delete"
             self.delete(type, level)
             return
         self.find() # Make sure relevant node in dictionary hasn't been deleted?
@@ -221,13 +216,9 @@ class Inventory(SimpleNode):
             graph.create(Relationship(self.usernode,'HAS',node))
     
     def delete(self, type, level=None):
-        print "deleting node"
-        print [self.username, type, level]
         k = (type,level)
         if self.nodes.has_key(k):
-            print "node in dict"
             node = self.nodes.pop(k)
-            #graph.delete(node)
         query = """
         MATCH (n:Inventory)<-[:HAS]-(u:User)
         WHERE u.username = {username}
