@@ -2,6 +2,7 @@
 
 {% block body %}
   {% if session.username %}
+  <h3>Connections</h3>
     <ul>
     {% for agent in verified_neighbors %}
       <li> {{ agent.username }} </li>
