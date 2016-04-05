@@ -186,15 +186,17 @@ class Inventory(SimpleNode):
         self._node = {}
     
     def find(self):
+        print "Refreshing inventory dict"
         query = """
-        MATCH (user:User)-[r:HAS]->(b:Item)
+        MATCH (user:User)-[r:HAS]->(b:Inventory)
         WHERE user.username = {username}
         RETURN b
         """
         d={}
-        nodes = graph.cypher.execute(query, username=self.username)
-        for node in nodes:
-            d[(node.type, node.level)] = node
+        results = graph.cypher.execute(query, username=self.username)
+        for record in results:
+            node = record[0]
+            d[(node['type'], node['level'])] = node
         self._node = d
     
     @property
@@ -211,7 +213,7 @@ class Inventory(SimpleNode):
         k = (type,level)
         if self.nodes.has_key(k):
             node = self.nodes[k]
-            node.value = value
+            node['value'] = value
             graph.push(node)
         else:
             node = Node('Inventory',type=type,value=value,level=level,id=self.new_guid())
@@ -220,18 +222,20 @@ class Inventory(SimpleNode):
     
     def delete(self, type, level=None):
         print "deleting node"
+        print [self.username, type, level]
         k = (type,level)
         if self.nodes.has_key(k):
+            print "node in dict"
             node = self.nodes.pop(k)
             #graph.delete(node)
-            query = """
-            MATCH (n:Inventory)<-[:HAS]-(u:User)
-            WHERE u.username = {username}
-            AND   n.type = {type}
-            AND   n.level = {level}
-            DETACH DELETE n
-            """
-            graph.cypher.execute(query, username=self.username, type=type, level=level)
+        query = """
+        MATCH (n:Inventory)<-[:HAS]-(u:User)
+        WHERE u.username = {username}
+        AND   n.type = {type}
+        AND   n.level = {level}
+        DETACH DELETE n
+        """
+        graph.cypher.execute(query, username=self.username, type=type, level=level)
         
         
 if __name__ == '__main__':
