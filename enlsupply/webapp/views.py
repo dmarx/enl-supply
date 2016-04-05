@@ -18,7 +18,7 @@ def index():
         #inventory = [(n.type, n.level, n.value) for n in User.inventory.nodes]
         
         #inventory = [(n.type, n.level, n.value) for n in Inventory(username).nodes]
-        inventory = [{'type':k[0], 'level':k[1], 'value':v} for k,v in Inventory(username).nodes.iteritems()]
+        inventory = [{'type':k[0], 'level':k[1], 'value':v['value']} for k,v in Inventory(username).nodes.iteritems()]
         print "inventory at index:", inventory
     return render_template('index.html', inventory=inventory)
     

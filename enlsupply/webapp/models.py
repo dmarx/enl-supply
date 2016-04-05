@@ -183,7 +183,6 @@ class Inventory(SimpleNode):
     def __init__(self, username):
         self.username = username
         self.usernode = graph.find_one('User', 'username', username)
-        self._node = {}
     
     def find(self):
         print "Refreshing inventory dict"
@@ -197,7 +196,8 @@ class Inventory(SimpleNode):
         for record in results:
             node = record[0]
             d[(node['type'], node['level'])] = node
-        self._node = d
+        #self._node = d
+        return d
     
     @property
     def nodes(self):
