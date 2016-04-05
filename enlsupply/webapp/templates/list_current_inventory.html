@@ -1,0 +1,22 @@
+<h3>Current Inventory</h3>
+
+<table class="inventory">
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Level</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for row in inventory %}
+    <tr>
+      <td>{{ row.type }}</td>
+      <td>{{ row.level }}</td>
+      <td>{{ row.value }}</td>
+    </tr>
+  {% else %}
+    Inventory is empty.
+  {% endfor %}
+  </tbody>
+</table>
