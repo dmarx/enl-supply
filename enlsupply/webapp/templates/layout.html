@@ -5,19 +5,20 @@
   <h1>ENL Supply Chain</h1>
   <div class="metanav">
   {% if session.username %}
-  Logged in as {{ session.username }}
+    Logged in as {{ session.username }}
   {% endif %}
   <a href="{{ url_for('index') }}">Home</a>
   {% if not session.username %}
     <a href="{{ url_for('register') }}">Register</a>
     <a href="{{ url_for('login') }}">Login</a>
   {% else %}
-    <!--<a href="{{ url_for('profile', username=session.username) }}">Profile</a>-->
     <a href="{{ url_for('logout') }}">Logout</a>
   {% endif %}
   </div>
+
   {% for message in get_flashed_messages() %}
     <div class="flash">{{ message }}</div>
   {% endfor %}
+ 
   {% block body %}{% endblock %}
 </div>
