@@ -8,10 +8,9 @@
   <h3>Supply lines</h3>
     <ul>
     {% for rec in paths %}
-      <li> {{ rec.supply.type }} | {{ rec.supply.level }} | {{ rec.supply.value }} </li>
-      {% for node in rec.path %}
-        <li> {{ node.username }} </li>
-      {% endfor %}
+      <li> {{ rec.supply.type }} | {{ rec.supply.level }} | {{ rec.supply.value }} |
+       {{ rec.path | map(attribute='username') | join(' <-- ') }}
+      </li>
     {% else %}
       No one within two "steps" of you has gear you need.
     {% endfor %}
