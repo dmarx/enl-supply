@@ -93,7 +93,7 @@ def logout():
 def add_inventory():
     type = request.form['type']
     level = request.form['level']
-    value = request.form['value']
+    value = int(request.form['value'])
 
     if not type or not level:
         flash('You must specify item type and level.')

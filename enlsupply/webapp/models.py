@@ -207,9 +207,9 @@ class User(SimpleNode):
         
         source_costs = dict((rec.terminus['username'], rec.minCost) for rec in min_path_cost)
 
-        return self._filter_paths(paths, source_costs)
+        return self._filter_paths(paths, source_costs, direction)
         
-    def _filter_paths(self, paths, source_costs):
+    def _filter_paths(self, paths, source_costs, direction):
         """ filter paths down to paths with the least weight between two nodes in the event
         that several paths with the same source and target are returned.
         """
@@ -224,7 +224,10 @@ class User(SimpleNode):
             path = []
             for rel in rec.chain:
                 #path.extend(rel.nodes)
-                q,p = rel.nodes
+                if direction == 'in':
+                    q,p = rel.nodes
+                else:
+                    p,q = rel.nodes
                 if not path:
                     path =[p,q]
                 else:
