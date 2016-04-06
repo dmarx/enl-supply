@@ -9,7 +9,7 @@
   <table class="inventory">
     <thead>
       <tr>
-        <!--<th>User</th>-->
+        <th>User</th>
         <th>Type</th>
         <th>Level</th>
         <th>Count</th>
@@ -19,11 +19,11 @@
     <tbody>
     {% for rec in paths %}
     <tr>
-      <!--<td> {{ rec.path | last | attr('username') }} </td>-->
+      <td> {{ rec.terminus.displayname }} </td>
       <td> {{ rec.supply.type }}  </td>
       <td> {{ rec.supply.level }} </td> 
       <td> {{ rec.supply.value }} </td>
-      <td> {{ rec.path | map(attribute='username') | join(' <-- ') }} </td>
+      <td> {{ rec.path | map(attribute='displayname') | join(' <-- ') }} </td>
     </tr>
     {% else %}
       No one within two "steps" of you has gear you need.

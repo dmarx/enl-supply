@@ -30,11 +30,21 @@ def supply_me():
         user = User(session['username'])
         inventory = [{'type':k[0], 'level':k[1], 'value':v['value']} 
                      for k,v in user.inventory.nodes.iteritems()]
-        paths = user.supply_paths(direction='in')
+        paths,_ = user.supply_paths(direction='in')
         paths = sorted(paths, key=lambda k: (k['cost'], k['path'][1]['username']))
-        for path in paths:
-            path['path'] = path['path'][1:] # 0th node seems to be same as last node for some reason.
     return render_template('supply_me.html', paths=paths, inventory=inventory)
+    
+
+@app.route('/supply_team')
+def supply_team():
+    paths = None
+    if session.has_key('username'):
+        user = User(session['username'])
+        inventory = [{'type':k[0], 'level':k[1], 'value':v['value']} 
+                     for k,v in user.inventory.nodes.iteritems()]
+        paths,_ = user.supply_paths(direction='out')
+        paths = sorted(paths, key=lambda k: (k['cost'], k['path'][1]['username']))
+    return render_template('supply_team.html', paths=paths, inventory=inventory)
     
 # the connections, supply_me, supply_team endpoints are all very similar. Could
 # probably DRY out my code with a custom decorator or factory function or something.

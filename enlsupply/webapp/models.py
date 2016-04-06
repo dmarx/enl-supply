@@ -187,25 +187,25 @@ class User(SimpleNode):
         s2={'in':'', 'out':'>'}[direction]
         s3={'in':'<', 'out':'>'}[direction]
         query="""
-        MATCH (demand)<-[:HAS]-(a){s1}-[chain:CAN_REACH*1..{radius}]-{s2}(source)-[:HAS]-(supply) 
+        MATCH (demand)<-[:HAS]-(a){s1}-[chain:CAN_REACH*1..{radius}]-{s2}(terminus)-[:HAS]-(supply) 
         where a.username={{username}}
         and supply.type = demand.type 
         and SIGN(demand.value) {s3} SIGN(supply.value) 
-        return source, min(reduce(tot=0, r in chain | tot + r.cost)) AS minCost
+        return terminus, min(reduce(tot=0, r in chain | tot + r.cost)) AS minCost
         """.format(s1=s1, s2=s2, s3=s3, radius=radius)
         min_path_cost = graph.cypher.execute(query, username=self.username)
         
         query="""
-        MATCH (demand)<-[:HAS]-(a){s1}-[chain:CAN_REACH*1..{radius}]-{s2}(source)-[:HAS]-(supply) 
+        MATCH (demand)<-[:HAS]-(a){s1}-[chain:CAN_REACH*1..{radius}]-{s2}(terminus)-[:HAS]-(supply) 
         where a.username={{username}}
         and supply.type = demand.type 
         and SIGN(demand.value) {s3} SIGN(supply.value)  
-        RETURN source, chain, supply, reduce(tot=0, r in chain | tot + r.cost) as totCost
+        RETURN terminus, chain, supply, reduce(tot=0, r in chain | tot + r.cost) as totCost
         ORDER BY totCost
         """.format(s1=s1, s2=s2, s3=s3, radius=radius)
         paths = graph.cypher.execute(query, username=self.username)
         
-        source_costs = dict((rec.source['username'], rec.minCost) for rec in min_path_cost)
+        source_costs = dict((rec.terminus['username'], rec.minCost) for rec in min_path_cost)
 
         return self._filter_paths(paths, source_costs)
         
@@ -215,7 +215,7 @@ class User(SimpleNode):
         """
         best_paths = []
         for rec in paths:
-            if rec.totCost == source_costs[rec.source['username']]:
+            if rec.totCost == source_costs[rec.terminus['username']]:
                 best_paths.append(rec)
                 
         # Expand the 'chain'
@@ -223,10 +223,17 @@ class User(SimpleNode):
         for rec in best_paths:
             path = []
             for rel in rec.chain:
-                path.extend(rel.nodes)
-            supply_chains.append({'path':path, 'supply':rec.supply, 'cost':rec.totCost})
+                #path.extend(rel.nodes)
+                q,p = rel.nodes
+                if not path:
+                    path =[p,q]
+                else:
+                    path.append(q)
+                
+            supply_chains.append({'path':path, 'supply':rec.supply, 
+                                  'terminus':rec.terminus, 'cost':rec.totCost})
         
-        return supply_chains
+        return supply_chains, best_paths
         
 #I'm pretty sure there's a better way I could implement this on the python side.
 # Feels fine on the database side, but the class api smells funny.

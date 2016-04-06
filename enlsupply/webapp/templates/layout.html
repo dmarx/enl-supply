@@ -13,9 +13,13 @@
     <a href="{{ url_for('register') }}">Register</a>
     <a href="{{ url_for('login') }}">Login</a>
   {% else %}
+    <a href="{{ url_for('logout') }}">Logout</a>
+    <br>
     <a href="{{ url_for('index') }}">Inventory</a>
     <a href="{{ url_for('connections') }}">Connections</a>
-    <a href="{{ url_for('logout') }}">Logout</a>
+    <a href="{{ url_for('supply_me') }}">Find Me Gear!</a>
+    <a href="{{ url_for('supply_team') }}">Who needs my gear?</a>
+    
   {% endif %}
   </div>
 
