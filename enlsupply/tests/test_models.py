@@ -86,5 +86,5 @@ for a,d in attr_d.iteritems():
         #user = graph.find_one("User", "username", u)
         #rel = Relationship(user, "HAS", inv)
         #graph.create(rel)
-        User(u).inventory.set(type=a, value=v, level=8)
+        User(u).inventory.set(type=a, value=v, level='8')
         

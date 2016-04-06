@@ -270,7 +270,7 @@ class Inventory(SimpleNode):
         return self.node
         
     def set(self, type, value, level=None):
-        if value=='0':
+        if value==0:
             self.delete(type, level)
             return
         self.find() # Make sure relevant node in dictionary hasn't been deleted?
