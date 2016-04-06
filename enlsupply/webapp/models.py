@@ -228,6 +228,12 @@ class User(SimpleNode):
                     q,p = rel.nodes
                 else:
                     p,q = rel.nodes
+                ######## This probably belongs elsewhere #####
+                if not p['displayname']:
+                    p['displayname'] = p['username']
+                if not q['displayname']:
+                    q['displayname'] = q['username']
+                ###############################################
                 if not path:
                     path =[p,q]
                 else:
