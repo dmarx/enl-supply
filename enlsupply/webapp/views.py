@@ -23,6 +23,21 @@ def connections():
         verified_neighbors = [neighbor for neighbor,_ in user.verified_neighbors()]
     return render_template('connections.html', verified_neighbors=verified_neighbors)
 
+@app.route('/supply_me')
+def supply_me():
+    paths = None
+    if session.has_key('username'):
+        user = User(session['username'])
+        inventory = [{'type':k[0], 'level':k[1], 'value':v['value']} 
+                     for k,v in user.inventory.nodes.iteritems()]
+        paths = user.supply_paths(direction='in')
+        paths = sorted(paths, key=lambda k: (k['cost'], k['path'][1]['username']))
+        for path in paths:
+            path['path'] = path['path'][1:] # 0th node seems to be same as last node for some reason.
+    return render_template('supply_me.html', paths=paths, inventory=inventory)
+    
+# the connections, supply_me, supply_team endpoints are all very similar. Could
+# probably DRY out my code with a custom decorator or factory function or something.
     
 @app.route('/register', methods=['GET','POST'])
 def register():
