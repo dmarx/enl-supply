@@ -1,11 +1,10 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<h2>Home</h2>
   {% if session.username %}
-  
-  {% include "list_current_inventory.html" %}
-  
+  <h2>Home</h2>
+    {% include "list_current_inventory.html" %}
+
     <h3>Add Inventory</h3>
     <form action="{{ url_for('add_inventory') }}" method="post">
         <dl>
@@ -18,5 +17,7 @@
         </dl>
         <input type="submit" value="Submit">
     </form>
+  {% else %}
+    {% include "login.html" %}
   {% endif %}
 {% endblock %}

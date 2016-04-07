@@ -6,13 +6,6 @@
   <div class="metanav">
   {% if session.username %}
     Logged in as {{ session.username }}
-  {% endif %}
-  
-  {% if not session.username %}
-    <a href="{{ url_for('index') }}">Home</a>
-    <a href="{{ url_for('register') }}">Register</a>
-    <a href="{{ url_for('login') }}">Login</a>
-  {% else %}
     <a href="{{ url_for('logout') }}">Logout</a>
     <br>
     <a href="{{ url_for('index') }}">Inventory</a>

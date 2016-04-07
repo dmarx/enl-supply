@@ -58,25 +58,7 @@ def supply_team():
     
 # the connections, supply_me, supply_team endpoints are all very similar. Could
 # probably DRY out my code with a custom decorator or factory function or something.
-    
-@app.route('/register', methods=['GET','POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
 
-        if len(username) < 1:
-            flash('Your username must be at least one character.')
-        elif len(password) < 5:
-            flash('Your password must be at least 5 characters.')
-        elif not User(username).register(password):
-            flash('A user with that username already exists.')
-        else:
-            session['username'] = username
-            flash('Logged in.')
-            return redirect(url_for('index'))
-
-    return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
