@@ -14,6 +14,20 @@ class GroupmeUser(object):
         response = requests.get(url, params=payload)
         if response.status_code == 200:
             return response.json()['response']
+    @property
+    def id(self):
+        if not hasattr(self, '_id'):
+            self._get_me()
+        return self._id
+    @property
+    def nickname(self):
+        if not hasattr(self, '_id'):
+            self._get_me()
+        return self._nickname
+    def _get_me(self):
+        data = self._request('/users/me')
+        self._id = data['user_id']
+        self._nickname = data['name']
     def get_groups(self):
         # object to generate:
         # * Dict mapping groups to a list of userids/nicknames

@@ -1,5 +1,14 @@
 from models import User, Inventory
 from flask import Flask, request, session, redirect, url_for, render_template, flash
+from utilities import verify_agent
+from groupme_api import GroupmeUser
+import os
+from ConfigParser import ConfigParser
+
+config = ConfigParser()
+config.read('settings.cfg')
+app_token = config.get('io','app_token')
+#app_token = os.environ.get('IO_APP_TOKEN') # how do we modify env settings in conda?
 
 app = Flask(__name__)
 
@@ -71,18 +80,20 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
-        if not User(username).verify_password(password):
+        access_token = request.form['access_token']
+        gm = GroupmeUser(access_token)
+        username = verify_agent(id=gm.id, token=app_token, service='groupme')
+        if not username:
             flash('Invalid login.')
+            if access_token:
+                flash('Access token from groupme received. Visit http://enl.io for additional authentication.')
         else:
             session['username'] = username
             flash('Logged in.')
             return redirect(url_for('index'))
 
     return render_template('login.html')
-
+    
 @app.route('/logout')
 def logout():
     session.pop('username', None)
