@@ -4,6 +4,7 @@ from utilities import verify_agent
 from groupme_api import GroupmeUser
 import os
 from ConfigParser import ConfigParser
+#from flask_oauth import OAuth
 
 config = ConfigParser()
 config.read('settings.cfg')
@@ -79,20 +80,22 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        access_token = request.form['access_token']
-        gm = GroupmeUser(access_token)
-        username = verify_agent(id=gm.id, token=app_token, service='groupme')
-        if not username:
-            flash('Invalid login.')
-            if access_token:
-                flash('Access token from groupme received. Visit http://enl.io for additional authentication.')
-        else:
-            session['username'] = username
-            flash('Logged in.')
-            return redirect(url_for('index'))
-
     return render_template('login.html')
+   
+@app.route('/_groupme_callback', methods=['GET'])   
+def _groupme_callback():
+    access_token = request.args.get('access_token')
+    gm = GroupmeUser(access_token)
+    username = verify_agent(id=gm.id, token=app_token, service='groupme')
+    if not username:
+        flash('Invalid login.')
+        if access_token:
+            flash('Access token from groupme received. Visit http://enl.io for additional authentication.')
+        return render_template('login.html')
+    else:
+        session['username'] = username
+        flash('Logged in.')
+        return redirect(url_for('index'))
     
 @app.route('/logout')
 def logout():
