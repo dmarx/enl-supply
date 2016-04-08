@@ -191,6 +191,7 @@ class User(SimpleNode):
         RETURN neighbor, 
                size(r) AS sim, 
                size([r0 in r WHERE r0.verified]) AS sim_verified
+        ORDER BY sim DESC, sim_verified DESC
         """.format(pk_name=self.pk_name)
         return graph.cypher.execute(query, {self.pk_name:self.pk})
         
