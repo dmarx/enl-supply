@@ -25,6 +25,13 @@
         specification.
     -->
     <table>
+    <thead>
+        <tr>
+            <th>GroupMe Nickname</th>
+            <th># groups in common</th>
+            <th>Shared groups</th>
+        </tr>
+    </thead>
     {% for suggestion in suggestions %}
         <tr>
             <td>{{ suggestion.nickname |join('<br>') | safe}}</td>
