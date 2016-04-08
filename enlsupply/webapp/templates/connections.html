@@ -11,5 +11,34 @@
       to agents you can easily meet with for gear exchange suggestions.
     {% endfor %}
     </ul>
+  
+  <h3>Suggested Connections</h3>
+  
+    Please indicate agents for whom it would not be a significant inconvenience
+    for you to meet to exchange gear.
+    
+    <!--
+        Should add an option to specify/filter which groups to consider.
+        A good approach would probably be a form listing the user's groups with 
+        multi-select radio buttons they can use to specify which groups to get
+        suggestions from, then we can populate suggestions based on the user's
+        specification.
+    -->
+    <table>
+    {% for suggestion in suggestions %}
+        <tr>
+            <td>{{ suggestion.nickname }}</td>
+            <td>{{ suggestion.n_groups }}</td>
+            <td>{{ suggestion.groups |join('<br>') | safe}}</td>
+        </tr>
+    {% else %}
+        You aren't in any GroupMe groups with agents in them. That's... weird. 
+        If you believe you are seeing this message in error, please contact the 
+        site administrator and describe the circumstances underwhich you saw 
+        this message.
+    {% endfor %}
+    </table>
+    
   {% endif %}
+  
 {% endblock %}

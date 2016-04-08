@@ -40,8 +40,11 @@ def connections():
     verified_neighbors = None
     if session.has_key('username'):
         user = User(session['groupme_id'])
+        gm = GroupmeUser(session['groupme_token'])
         verified_neighbors = [neighbor for neighbor,_ in user.verified_neighbors()]
-    return render_template('connections.html', verified_neighbors=verified_neighbors)
+    return render_template('connections.html', 
+                           verified_neighbors=verified_neighbors,
+                           suggestions=gm.similar_users(50))
 
 @app.route('/supply_me')
 def supply_me():
@@ -87,6 +90,7 @@ def _groupme_callback():
     else:
         session['username'] = username
         session['groupme_id'] = gm.id
+        session['groupme_token'] = access_token
         User(groupme_id = gm.id, groupme_nick=gm.nickname, agent_name=username)
         print "callback", session['groupme_id']
         flash('Logged in.')

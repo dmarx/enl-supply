@@ -47,6 +47,7 @@ class GroupmeUser(object):
                     members_groups[id].append(g['name'])
                     neighbors_nicks[id] = user['nickname']
                     ids.add(id)
+                members.sort()
                 groups_members[g['name']] = members
         self.groups_members = groups_members
         self.members_groups = members_groups
@@ -69,7 +70,14 @@ class GroupmeUser(object):
     def similar_users(self,k=10):
         if not hasattr(self, 'members_groups'):
             self.get_groups()
-        return sorted(self.members_groups.iteritems(), key=lambda x: -len(x[1]))[1:k]
+        if k==0:
+            k=len(self.members_groups)
+        k=k+2
+        sugg = sorted(self.members_groups.iteritems(), key=lambda x: -len(x[1]))[1:k]
+        return [{'nickname':self.neighbors_nicks[id], 
+                 'n_groups':len(groups),
+                 'groups':groups} for id, groups in sugg 
+                 if id != 15678427] # Ignore Jarvis
             
 if __name__ == '__main__':
     demo_token = None
