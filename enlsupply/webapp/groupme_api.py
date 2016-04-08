@@ -82,7 +82,7 @@ class GroupmeUser(object):
                  'groups':groups,
                  'id':id
                  } for id, groups in sugg 
-                 if id != 15678427] # Ignore Jarvis
+                 if id != '15678427'] # Ignore Jarvis
             
 if __name__ == '__main__':
     demo_token = None

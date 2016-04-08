@@ -163,7 +163,7 @@ class User(SimpleNode):
         
     def verified_neighbors(self):
         query = """
-        MATCH (user:User)-[path:CAN_REACH]-(neighbor:User)
+        MATCH (user:User)-[path:CAN_REACH]->(neighbor:User)
         WHERE user.{pk_name} = {{{pk_name}}}
         AND path.verified = TRUE
         RETURN neighbor, path
@@ -172,10 +172,25 @@ class User(SimpleNode):
         
     def unverified_neighbors(self):
         query = """
-        MATCH (user:User)-[r:CAN_REACH]-(b:User)
+        MATCH (user:User)-[path:CAN_REACH]->(neighbor:User)
         WHERE user.{pk_name} = {{{pk_name}}}
-        AND r.verified = FALSE
-        RETURN b, r
+        AND path.verified = FALSE
+        RETURN neighbor, path
+        """.format(pk_name=self.pk_name)
+        return graph.cypher.execute(query, {self.pk_name:self.pk})
+        
+    def unverified_neighbors_similarity(self):
+        # Samea s above but returns a similarity score
+        query = """
+        MATCH (user:User)-[path:CAN_REACH]->(neighbor:User)
+        WHERE user.{pk_name} = {{{pk_name}}}
+        AND path.verified = FALSE
+        WITH user, neighbor, path
+            MATCH (x)-[r*1..2]-(y)
+            WHERE x=user AND y=neighbor
+        RETURN neighbor, 
+               size(r) AS sim, 
+               size([r0 in r WHERE r0.verified]) AS sim_verified
         """.format(pk_name=self.pk_name)
         return graph.cypher.execute(query, {self.pk_name:self.pk})
         
@@ -330,6 +345,37 @@ class Inventory(SimpleNode):
         graph.cypher.execute(query, {self.pk_name:self.pk}, type=type, level=level)
         
         
+class ConnectionSuggesterGM(object):
+    def __init__(self, groupme_id, groupme_token):
+        self.id=groupme_id
+        self.user = User(groupme_id)
+        self.gm   = GroupmeUser(groupme_token)
+        self.neighbors = [n['groupme_id'] for n in self.user.neighbors()]
+        
+    @property
+    def new_connections(self):
+        """
+        Return users connected through groupme that are not connected to the
+        current user in any way. 
+        """
+        # Should I change this to use .verified_neighbors instead of .neighbors?
+        if not hasattr(self, '_new_connections'):
+            self._new_connections = []
+            for sugg in self.gm.similar_users(0): # 0=no limit
+                if sugg['id'] not in self.neighbors:
+                    self.unconn.append(sugg)
+            self._current_sort = 'groupmeGroups'
+        return self._new_connections
+        
+    @property
+    def verify_connections(self):
+        """
+        Find users who have connected to the current user, but the connection 
+        as not been reciprocated.
+        """
+        if not hasattr(self, '_verify_connections'):
+            self._verify_connections = self.user.unverified_neighbors_similarity()
+            
 if __name__ == '__main__':
     # These are basically all tests and should be handled by nose. I'll port this later.
     pwd = 'fakepass'
