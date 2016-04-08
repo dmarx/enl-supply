@@ -2,21 +2,25 @@
 {% block body %}
 
   {% if session.username %}
-  <h2>Home</h2>
+    
+    <h2>Welcome!</h2>
+    
+    ENL Supply chain is a tool for connecting agents who have a surplus of inventory 
+    with agents looking for those items. 
+    <br>
+    <br>
+    <h3><a href="{{ url_for('update_inventory') }}">Manage Inventory</a></h3>
+      <ul>Specify your inventory demands or excess supply.</ul>
+    <h3><a href="{{ url_for('connections') }}">Manage Connections</a></h3>
+      <ul>Connect to agents in your GroupMe groups who you have "!met" so we can link you to trade gear.</ul>
+    <h3><a href="{{ url_for('supply_me') }}">Find Me Gear!</a></h3>
+      <ul>You've listed what you need: here's where you get the hook up</ul>
+    <h3><a href="{{ url_for('supply_team') }}">Who needs my gear?</a></h3>
+      <ul>At cap? Don't recycle that gear, these agents need it!</ul>
+    </ul>
+    
     {% include "list_current_inventory.html" %}
-
-    <h3>Add Inventory</h3>
-    <form action="{{ url_for('add_inventory') }}" method="post">
-        <dl>
-            <dt>Type:</dt>
-            <dd><input type="text" size="30" name="type"></dd>
-            <dt>Level:</dt>
-            <dd><input type="text" size="30" name="level"></dd>
-            <dt>Value:</dt>
-            <dd><input type="text" size="30" name="value"></dd>
-        </dl>
-        <input type="submit" value="Submit">
-    </form>
+    
   {% else %}
     {% include "login.html" %}
   {% endif %}

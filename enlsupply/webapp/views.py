@@ -25,6 +25,14 @@ def index():
         inventory = [{'type':k[0], 'level':k[1], 'value':v['value']} for k,v in Inventory(username).nodes.iteritems()]
     return render_template('index.html', inventory=inventory)
 
+@app.route('/update_inventory')
+def update_inventory():
+    inventory = None
+    if session.has_key('username'):
+        username = session['username']
+        inventory = [{'type':k[0], 'level':k[1], 'value':v['value']} for k,v in Inventory(username).nodes.iteritems()]
+    return render_template('update_inventory.html', inventory=inventory)
+    
 @app.route('/connections')
 def connections():
     verified_neighbors = None

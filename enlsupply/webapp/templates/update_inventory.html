@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block body %}
+
+  {% if session.username %}
+
+    {% include "list_current_inventory.html" %}
+
+    <h3>Add Inventory</h3>
+    <form action="{{ url_for('add_inventory') }}" method="post">
+        <dl>
+            <dt>Type:</dt>
+            <dd><input type="text" size="30" name="type"></dd>
+            <dt>Level:</dt>
+            <dd><input type="text" size="30" name="level"></dd>
+            <dt>Value:</dt>
+            <dd><input type="text" size="30" name="value"></dd>
+        </dl>
+        <input type="submit" value="Submit">
+    </form>
+  {% else %}
+    {% include "login.html" %}
+  {% endif %}
+{% endblock %}
