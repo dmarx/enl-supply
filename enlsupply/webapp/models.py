@@ -32,8 +32,12 @@ class SimpleNode(object):
     def nodetype(self):
         return str(self.__class__).split('.')[-1][:-2]
     def find(self):
+        print self.nodetype, self.pk_name, self.pk
         node = graph.find_one(self.nodetype, self.pk_name, self.pk)
+        print type(node)
         return node
+    def merge(self):
+        return graph.merge_one(self.nodetype, self.pk_name, self.pk)
     @staticmethod
     def new_guid():
         return ''.join(str(uuid.uuid4()).split('-'))
@@ -55,25 +59,41 @@ class SimpleNode(object):
     #    graph.push(self.node)
 
 class User(SimpleNode):
-    def __init__(self, username):
-        self.displayname = username
-        self.username = username.lower()
-        self.pk_name = "username"
-        self.inventory = Inventory(username)
-    # This is necessary to make sure inherited functions don't break
+    def __init__(self, groupme_id, groupme_nick=None, agent_name=None):
+        # For inherited methods, in particular .find()
+        
+        self.agent_name = agent_name
+        self.groupme_nick = groupme_nick
+        self.groupme_id = groupme_id
+        
+        self.pk_name = "groupme_id"
+        self.pk = self.groupme_id
+        
+        user = self.merge()
+        if agent_name and not user['agent_name']:
+            user['agent_name'] = agent_name
+        if groupme_nick and not not user['groupme_nick']:
+            user['groupme_nick'] = groupme_nick
+        graph.push(user)
+        self._node = user
+        self.inventory = Inventory(self.pk, self.pk_name)
+        
     @property
-    def pk(self):
-        return self.username
+    def display_name(self):
+        if self.agent_name:
+            return self.agent_name
+        else:
+            return self.groupme_nick
     
-    def register(self, password):
-        user = graph.merge_one("User", "username", self.username)
-        if not user['password']:
-            user['displayname'] = self.displayname
-            user['password'] = bcrypt.encrypt(password)
-            graph.push(user)
-            self._node = user
-            return True
-        return False
+    #def register(self, password):
+    #    user = graph.merge_one("User", "username", self.username)
+    #    if not user['password']:
+    #        user['displayname'] = self.displayname
+    #        user['password'] = bcrypt.encrypt(password)
+    #        graph.push(user)
+    #        self._node = user
+    #        return True
+    #    return False
         
     def verify_password(self, password):
         if self.node:
@@ -136,39 +156,39 @@ class User(SimpleNode):
     def neighbors(self, radius=1):
         query = """
         MATCH (user:User)-[path:CAN_REACH*1..{radius}]-(neighbor:User)
-        WHERE user.username = {{username}}
+        WHERE user.{pk_name} = {{{pk_name}}}
         RETURN neighbor, path
-        """.format(radius=radius)
-        return graph.cypher.execute(query, username=self.username)
+        """.format(radius=radius, pk_name=self.pk_name)
+        return graph.cypher.execute(query, {self.pk_name:self.pk})
         
     def verified_neighbors(self):
         query = """
         MATCH (user:User)-[path:CAN_REACH]-(neighbor:User)
-        WHERE user.username = {username}
+        WHERE user.{pk_name} = {{{pk_name}}}
         AND path.verified = TRUE
         RETURN neighbor, path
-        """
-        return graph.cypher.execute(query, username=self.username)
+        """.format(pk_name=self.pk_name)
+        return graph.cypher.execute(query, {self.pk_name:self.pk})
         
     def unverified_neighbors(self):
         query = """
         MATCH (user:User)-[r:CAN_REACH]-(b:User)
-        WHERE user.username = {username}
+        WHERE user.{pk_name} = {{{pk_name}}}
         AND r.verified = FALSE
         RETURN b, r
-        """
-        return graph.cypher.execute(query, username=self.username)
+        """.format(pk_name=self.pk_name)
+        return graph.cypher.execute(query, {self.pk_name:self.pk})
         
     def suggest_neighbors_by_community(self, limit):
         query="""
         MATCH (user:User)-[r:IS_MEMBER_OF]->(community:Community)<-[r:IS_MEMBER_OF]-(suggestion:User)
-        WHERE user.username = {username}
+        WHERE user.{pk_name} = {{{pk_name}}}
         AND NOT (user)-[:CAN_REACH]-(suggestion)
         RETURN suggestion, COLLECT(community.name), COUNT(*) as N
         ORDER BY N DESC LIMIT {k}
-        """
+        """.format(pk_name=self.pk_name)
         # Not sure COUNT(*) is doing what I think it is, need to test more
-        return graph.cypher.execute(query, username=self.username, k=limit)
+        return graph.cypher.execute(query, {self.pk_name:self.pk, 'k':limit})
         
     def communities(self):
         query = """
@@ -188,24 +208,24 @@ class User(SimpleNode):
         s3={'in':'<', 'out':'>'}[direction]
         query="""
         MATCH (demand)<-[:HAS]-(a){s1}-[chain:CAN_REACH*1..{radius}]-{s2}(terminus)-[:HAS]-(supply) 
-        where a.username={{username}}
+        where a.{pk_name}={{{pk_name}}}
         and supply.type = demand.type 
         and SIGN(demand.value) {s3} SIGN(supply.value) 
         return terminus, min(reduce(tot=0, r in chain | tot + r.cost)) AS minCost
-        """.format(s1=s1, s2=s2, s3=s3, radius=radius)
-        min_path_cost = graph.cypher.execute(query, username=self.username)
+        """.format(s1=s1, s2=s2, s3=s3, radius=radius, pk_name=self.pk_name)
+        min_path_cost = graph.cypher.execute(query, {self.pk_name:self.pk})
         
         query="""
         MATCH (demand)<-[:HAS]-(a){s1}-[chain:CAN_REACH*1..{radius}]-{s2}(terminus)-[:HAS]-(supply) 
-        where a.username={{username}}
+        where a.{pk_name}={{{pk_name}}}
         and supply.type = demand.type 
         and SIGN(demand.value) {s3} SIGN(supply.value)  
         RETURN terminus, chain, supply, reduce(tot=0, r in chain | tot + r.cost) as totCost
         ORDER BY totCost
-        """.format(s1=s1, s2=s2, s3=s3, radius=radius)
-        paths = graph.cypher.execute(query, username=self.username)
+        """.format(s1=s1, s2=s2, s3=s3, radius=radius, pk_name=self.pk_name)
+        paths = graph.cypher.execute(query, {self.pk_name:self.pk})
         
-        source_costs = dict((rec.terminus['username'], rec.minCost) for rec in min_path_cost)
+        source_costs = dict((rec.terminus[self.pk_name], rec.minCost) for rec in min_path_cost)
 
         return self._filter_paths(paths, source_costs, direction)
         
@@ -215,7 +235,7 @@ class User(SimpleNode):
         """
         best_paths = []
         for rec in paths:
-            if rec.totCost == source_costs[rec.terminus['username']]:
+            if rec.totCost == source_costs[rec.terminus[self.pk_name]]:
                 best_paths.append(rec)
                 
         # Expand the 'chain'
@@ -229,10 +249,10 @@ class User(SimpleNode):
                 else:
                     p,q = rel.nodes
                 ######## This probably belongs elsewhere #####
-                if not p['displayname']:
-                    p['displayname'] = p['username']
-                if not q['displayname']:
-                    q['displayname'] = q['username']
+                #if not p['displayname']:
+                #    p['displayname'] = p['username']
+                #if not q['displayname']:
+                #    q['displayname'] = q['username']
                 ###############################################
                 if not path:
                     path =[p,q]
@@ -254,18 +274,22 @@ class Inventory(SimpleNode):
               'us',  # Ultra Strike
               'sh']  # Shield
     
-    def __init__(self, username):
-        self.username = username
-        self.usernode = graph.find_one('User', 'username', username)
+    def __init__(self, pk, pk_name, attached_node_type='User'):
+        self.pk = pk
+        self.pk_name = pk_name
+        self.attached_node_type = attached_node_type
+        print "Get inv:", (self.nodetype, self.pk_name, self.pk)
+        self.usernode = graph.find_one(attached_node_type, pk_name, pk)
     
     def find(self):
         query = """
         MATCH (user:User)-[r:HAS]->(b:Inventory)
-        WHERE user.username = {username}
+        WHERE user.{pk_name} = {{{pk_name}}}
         RETURN b
-        """
+        """.format(pk_name=self.pk_name)
+        print query
         d={}
-        results = graph.cypher.execute(query, username=self.username)
+        results = graph.cypher.execute(query, {self.pk_name:self.pk})
         for record in results:
             node = record[0]
             d[(node['type'], node['level'])] = node
@@ -288,6 +312,8 @@ class Inventory(SimpleNode):
         else:
             node = Node('Inventory',type=type,value=value,level=level,id=self.new_guid())
             self.nodes[k] = node
+            print self.usernode
+            print node
             graph.create(Relationship(self.usernode,'HAS',node))
     
     def delete(self, type, level=None):
@@ -296,12 +322,12 @@ class Inventory(SimpleNode):
             node = self.nodes.pop(k)
         query = """
         MATCH (n:Inventory)<-[:HAS]-(u:User)
-        WHERE u.username = {username}
-        AND   n.type = {type}
-        AND   n.level = {level}
+        WHERE u.{pk_name} = {{{pk_name}}}
+        AND   n.type = {{type}}
+        AND   n.level = {{level}}
         DETACH DELETE n
-        """
-        graph.cypher.execute(query, username=self.username, type=type, level=level)
+        """.format(pk_name=self.pk_name)
+        graph.cypher.execute(query, {self.pk_name:self.pk}, type=type, level=level)
         
         
 if __name__ == '__main__':

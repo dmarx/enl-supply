@@ -21,23 +21,25 @@ app = Flask(__name__)
 def index():
     inventory = None
     if session.has_key('username'):
-        username = session['username']
-        inventory = [{'type':k[0], 'level':k[1], 'value':v['value']} for k,v in Inventory(username).nodes.iteritems()]
+        groupme_id = session['groupme_id']
+        inventory = [{'type':k[0], 'level':k[1], 'value':v['value']} 
+                     for k,v in Inventory(pk=groupme_id, pk_name="groupme_id").nodes.iteritems()]
     return render_template('index.html', inventory=inventory)
 
 @app.route('/update_inventory')
 def update_inventory():
     inventory = None
     if session.has_key('username'):
-        username = session['username']
-        inventory = [{'type':k[0], 'level':k[1], 'value':v['value']} for k,v in Inventory(username).nodes.iteritems()]
+        groupme_id = session['groupme_id']
+        inventory = [{'type':k[0], 'level':k[1], 'value':v['value']} 
+                     for k,v in Inventory(pk=groupme_id, pk_name="groupme_id").nodes.iteritems()]
     return render_template('update_inventory.html', inventory=inventory)
     
 @app.route('/connections')
 def connections():
     verified_neighbors = None
     if session.has_key('username'):
-        user = User(session['username'])
+        user = User(session['groupme_id'])
         verified_neighbors = [neighbor for neighbor,_ in user.verified_neighbors()]
     return render_template('connections.html', verified_neighbors=verified_neighbors)
 
@@ -45,7 +47,7 @@ def connections():
 def supply_me():
     paths = None
     if session.has_key('username'):
-        user = User(session['username'])
+        user = User(session['groupme_id'])
         inventory = [{'type':k[0], 'level':k[1], 'value':v['value']} 
                      for k,v in user.inventory.nodes.iteritems()]
         paths,_ = user.supply_paths(direction='in')
@@ -57,7 +59,7 @@ def supply_me():
 def supply_team():
     paths = None
     if session.has_key('username'):
-        user = User(session['username'])
+        user = User(session['groupme_id'])
         inventory = [{'type':k[0], 'level':k[1], 'value':v['value']} 
                      for k,v in user.inventory.nodes.iteritems()]
         paths,_ = user.supply_paths(direction='out')
@@ -80,16 +82,20 @@ def _groupme_callback():
     if not username:
         flash('Invalid login.')
         if access_token:
-            flash('Access token from groupme received. Visit http://enl.io for additional authentication.')
+            flash('Access token from groupme received, but unable to confirm your identitiy as an Enlightened Agent. Visit http://enl.io for additional authentication.')
         return render_template('login.html')
     else:
         session['username'] = username
+        session['groupme_id'] = gm.id
+        User(groupme_id = gm.id, groupme_nick=gm.nickname, agent_name=username)
+        print "callback", session['groupme_id']
         flash('Logged in.')
         return redirect(url_for('index'))
     
 @app.route('/logout')
 def logout():
     session.pop('username', None)
+    session.pop('groupme_id', None)
     flash('Logged out.')
     return redirect(url_for('index'))
     
@@ -102,6 +108,6 @@ def add_inventory():
     if not type or not level:
         flash('You must specify item type and level.')
     else:
-        User(session['username']).inventory.set(type=type, level=level, value=value)
+        User(session['groupme_id']).inventory.set(type=type, level=level, value=value)
 
-    return redirect(url_for('index'))
+    return redirect(url_for('update_inventory'))
