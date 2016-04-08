@@ -79,7 +79,9 @@ class GroupmeUser(object):
         sugg = sorted(self.members_groups.iteritems(), key=lambda x: -len(x[1]))[1:k]
         return [{'nickname':self.neighbors_nicks[id], 
                  'n_groups':len(groups),
-                 'groups':groups} for id, groups in sugg 
+                 'groups':groups,
+                 'id':id
+                 } for id, groups in sugg 
                  if id != 15678427] # Ignore Jarvis
             
 if __name__ == '__main__':

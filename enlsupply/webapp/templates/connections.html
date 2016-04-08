@@ -24,9 +24,12 @@
         suggestions from, then we can populate suggestions based on the user's
         specification.
     -->
+    <br>
+    <br>
     <table>
     <thead>
         <tr>
+            <th>Connect</th>
             <th>GroupMe Nickname</th>
             <th># groups in common</th>
             <th>Shared groups</th>
@@ -34,6 +37,9 @@
     </thead>
     {% for suggestion in suggestions %}
         <tr>
+            <td>
+                <input type="checkbox" name="{{ suggestion.id }}" value="{{ suggestion.id }}">
+            </td>
             <td>{{ suggestion.nickname |join('<br>') | safe}}</td>
             <td>{{ suggestion.n_groups }}</td>
             <td>{{ suggestion.groups |join('<br>') | safe}}</td>

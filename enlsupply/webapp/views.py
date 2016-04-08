@@ -42,9 +42,11 @@ def connections():
         user = User(session['groupme_id'])
         gm = GroupmeUser(session['groupme_token'])
         verified_neighbors = [neighbor for neighbor,_ in user.verified_neighbors()]
-    return render_template('connections.html', 
-                           verified_neighbors=verified_neighbors,
-                           suggestions=gm.similar_users(50))
+        return render_template('connections.html', 
+                               verified_neighbors=verified_neighbors,
+                               suggestions=gm.similar_users(50))
+    else:
+        return redirect(url_for('index'))
 
 @app.route('/supply_me')
 def supply_me():
