@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+{% block body %}
+
+  {% if session.username %}
+
+    <h2>FAQ</h2>
+
+    <h3>What is enl.supply?</h3>
+
+    enl.supply is a logistical operations tool for matching agents with a surplus of inventory with agents who need inventory. Our goal is to maximize the efficiency of our team's item usage and farming capabilities.
+
+    <h3>How does it work?</h3>
+
+    Users specify agents they are connected to by shared GroupMe groups who they have "!met" to form a "social network" where a connection represents the ability to meet that person to exchange gear without a significant imposition. Then, users tell the application what gear they have or need. The application then suggests exchanges or sequences of exchanges that connect users that need gear with agents that can satisfy that demand.
+
+    <h3>How do I connect with someone?<h3>
+
+    You can connect with anyone who is in a GroupMe group you are in who you have also "!met" via the Roland Jarvis GroupMe bot operated by enl.io. Once agent A connects to agent B, they will be able to know what types of inventory agent B and their friends have, but not how much. Agent B has the ability to block this connection, which means agetn A will no longer have this window into the inventory of agent B and their friends. If agent B validates this connection, agent A will also be able to see how much of each item agent B has, and also agent B's friends who have similarly validated their relationship with agent B.
+
+    This system is in place to reduce the threat of double agents using this system to gain intel on ENL inventory status or movement, while still enabling agents to prioritize who they should contact to exchange equipment.
+
+    <h3>How are exchanges coordinated?</h3>
+
+    At present, it's up to the agents involved to coordinate exchanges. The application only tells you how to get the gear you need, it won't facilitate the exchange beyond that. In the future, we hope the application will be able to more actively facilitate exchanges.
+
+    <h3>How are suggestions for agents to connect to determined?</h3>
+
+    There are two kinds of suggestions: unconnected agents and weakly connected agents.
+
+    <h4>Unconnected agents</h4>
+
+    After you login with GroupMe, the application pulls down your GroupMe groups and their members from the GroupMe API (this data is not saved to a database and disappears when you end your session). Let's call this list of agents your "GroupMe neighbors." The application then counts how many of your groups each GroupMe neighbor shares with you, and sorts neighbors based on this count.
+
+    <h4>Weakly connected agents</h4>
+
+    If agent A connects with agent B, this is represented in our system as a "verified" connection from A->B and an "unverified" connection from B->A. If the system wants to suggest a transfer from A->B->C or C->B->A, agent A and agent C will see that they have gear the other needs, but only the type of gear and not how much. If agent B verifies the connection to A and C, and C verifies the connection to B, then and only then can agents A and C know how much of a given type of inventory the other has.
+
+    <h3>Can I use enl.supply for my community?</h3>
+
+    Currently, enl.supply is in a closed testing period constrained to a handful of eastern seabord communities.
+
+    <h3>What makes enl.supply secure?</h3>
+
+    Mainly, enl.io. Additionally, suggested paths are limited to two "hops", so you may be able to see the inventory of your direct connections and their friends (if everyone has "verified" the relevant connections as described above), but that's as deep into the network as any individual agent can see.
+
+    <h3>Can I donate?</h3>
+
+    Money? Not at the moment, no. But if you are a decent developer and want to help with the (admittedly ugly) site design, I would love it if you could donate some time! I should probably add some kind of contact method here, huh?
+
+    <h3>Who made this?</h3>
+
+    Agent scratchscratch, DMV Enlightened.
+
+  {% else %}
+    {% include "login.html" %}
+  {% endif %}
+{% endblock %}
