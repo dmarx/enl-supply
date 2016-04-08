@@ -27,7 +27,7 @@
     <table>
     {% for suggestion in suggestions %}
         <tr>
-            <td>{{ suggestion.nickname }}</td>
+            <td>{{ suggestion.nickname |join('<br>') | safe}}</td>
             <td>{{ suggestion.n_groups }}</td>
             <td>{{ suggestion.groups |join('<br>') | safe}}</td>
         </tr>

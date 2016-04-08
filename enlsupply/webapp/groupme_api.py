@@ -37,7 +37,7 @@ class GroupmeUser(object):
         if data:
             groups_members = {}
             members_groups = defaultdict(list)
-            neighbors_nicks = {}
+            neighbors_nicks = defaultdict(set)
             ids = set()
             for g in data:
                 members = []
@@ -45,10 +45,13 @@ class GroupmeUser(object):
                     id = user['user_id']
                     members.append(id)
                     members_groups[id].append(g['name'])
-                    neighbors_nicks[id] = user['nickname']
+                    neighbors_nicks[id].add(user['nickname'])
                     ids.add(id)
                 members.sort()
                 groups_members[g['name']] = members
+        for k,v in neighbors_nicks.iteritems():
+            neighbors_nicks[k] = list(v)
+            neighbors_nicks[k].sort()
         self.groups_members = groups_members
         self.members_groups = members_groups
         self.neighbors_nicks = neighbors_nicks
