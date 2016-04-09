@@ -1,5 +1,4 @@
 from py2neo import Graph, Node, Relationship, authenticate
-#from passlib.hash import bcrypt
 from datetime import datetime
 import os
 import uuid
@@ -85,22 +84,6 @@ class User(SimpleNode):
             return self.agent_name
         else:
             return self.groupme_nick
-    
-    #def register(self, password):
-    #    user = graph.merge_one("User", "username", self.username)
-    #    if not user['password']:
-    #        user['displayname'] = self.displayname
-    #        user['password'] = bcrypt.encrypt(password)
-    #        graph.push(user)
-    #        self._node = user
-    #        return True
-    #    return False
-        
-    #def verify_password(self, password):
-    #    if self.node:
-    #        return bcrypt.verify(password, self.node['password'])
-    #    else:
-    #        return False
 
     @property
     def is_active(self):
