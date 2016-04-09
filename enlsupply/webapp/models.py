@@ -2,6 +2,7 @@ from py2neo import Graph, Node, Relationship, authenticate
 from datetime import datetime
 import os
 import uuid
+from groupme_api import GroupmeUser
 #import sqlite3 # Create a separate database to track TTL
 # You know what, I'll implement TTL later.
 
@@ -339,20 +340,19 @@ class ConnectionSuggesterGM(object):
         self.id=groupme_id
         self.user = User(groupme_id)
         self.gm   = GroupmeUser(groupme_token)
-        self.neighbors = [n['groupme_id'] for n in self.user.neighbors()]
+        self.neighbors = [n['groupme_id'] for n,_ in self.user.neighbors()]
         
-    @property
-    def new_connections(self):
+    def new_connections(self,n=0):
         """
         Return users connected through groupme that are not connected to the
         current user in any way. 
         """
-        # Should I change this to use .verified_neighbors instead of .neighbors?
         if not hasattr(self, '_new_connections'):
             self._new_connections = []
-            for sugg in self.gm.similar_users(0): # 0=no limit
+            for sugg in self.gm.similar_users(n): # 0=no limit
+            # Should I change this to use .verified_neighbors instead of .neighbors?
                 if sugg['id'] not in self.neighbors:
-                    self.unconn.append(sugg)
+                    self._new_connections.append(sugg)
             self._current_sort = 'groupmeGroups'
         return self._new_connections
         

@@ -1,4 +1,4 @@
-from models import User, Inventory
+from models import User, Inventory, ConnectionSuggesterGM
 from flask import Flask, request, session, redirect, url_for, render_template, \
                   flash, jsonify
 from utilities import verify_agent
@@ -43,11 +43,17 @@ def connections():
     verified_neighbors = None
     if session.has_key('username'):
         user = User(session['groupme_id'])
-        gm = GroupmeUser(session['groupme_token'])
-        verified_neighbors = [neighbor for neighbor,_ in user.verified_neighbors()]
+        #gm = GroupmeUser(session['groupme_token'])
+        #verified_neighbors = [neighbor for neighbor,_ in user.verified_neighbors()]
+        #suggestions = gm.similar_users(50)
+        sugg = ConnectionSuggesterGM(session['groupme_id'], session['groupme_token'])
+        verified_neighbors = [neighbor for neighbor,_ in sugg.user.verified_neighbors()]
+        #verified_neighbors.sort()
+        verified_neighbors = sorted(verified_neighbors, key=lambda x: x['agent_name'].lower())
+        suggestions = sugg.new_connections()
         return render_template('connections.html', 
                                verified_neighbors=verified_neighbors,
-                               suggestions=gm.similar_users(50)) 
+                               suggestions=suggestions) 
     else:
         return redirect(url_for('index'))
 
