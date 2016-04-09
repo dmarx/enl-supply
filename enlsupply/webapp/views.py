@@ -127,10 +127,10 @@ def _submit_new_connections():
         agent = verify_agent(id=id, token=app_token, service='groupme')
         if agent:
             print "Adding link {src} -> {tgt}".format(src=user.agent_name, tgt=agent)
-            user.add_verified_relationship(groupme_id=id, agent_name=agent)
+            user.add_verified_relationship(groupme_id=id, agent_name=agent, cost=1)
         else:
             io_verif_fail.append(id)
-    return True
+    return redirect(url_for('index'))
     
 @app.route('/logout')
 def logout():

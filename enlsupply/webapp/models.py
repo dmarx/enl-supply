@@ -147,6 +147,7 @@ class User(SimpleNode):
         neighbor = graph.merge_one("User", 'groupme_id', groupme_id)
         if agent_name and not neighbor['agent_name']:
             neighbor['agent_name'] = agent_name
+            graph.push(neighbor)
         self.set_user_relationship(source=self.node, target=neighbor, cost=cost, verified=True, override=True)
         self.set_user_relationship(source=neighbor, target=self.node, cost=default_cost, verified=False, override=False)
         
