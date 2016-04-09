@@ -1,5 +1,5 @@
 from py2neo import Graph, Node, Relationship, authenticate
-from passlib.hash import bcrypt
+#from passlib.hash import bcrypt
 from datetime import datetime
 import os
 import uuid
@@ -95,11 +95,11 @@ class User(SimpleNode):
     #        return True
     #    return False
         
-    def verify_password(self, password):
-        if self.node:
-            return bcrypt.verify(password, self.node['password'])
-        else:
-            return False
+    #def verify_password(self, password):
+    #    if self.node:
+    #        return bcrypt.verify(password, self.node['password'])
+    #    else:
+    #        return False
 
     @property
     def is_active(self):
@@ -132,7 +132,7 @@ class User(SimpleNode):
             rel = Relationship(source, "CAN_REACH", target, cost=cost, verified=verified)
             graph.create_unique(rel) # Do I need to enforce a uniqueness constraint on relationships?
         
-    def add_verified_relationship(self, user, cost=None, default_cost=3):
+    def add_verified_relationship(self, groupme_id, agent_name=None, cost=None, default_cost=3):
         """
         Creates a relationship to the target user with a given cost and sets it as 
         "verified." Additionally, if the reverse relationsihp does not exist, 
@@ -144,8 +144,11 @@ class User(SimpleNode):
         """
         if cost is None:
             cost = default_cost
-        self.set_user_relationship(source=self.node, target=user, cost=cost, verified=True, override=True)
-        self.set_user_relationship(source=user, target=self.node, cost=default_cost, verified=False, override=False)
+        neighbor = graph.merge_one("User", 'groupme_id', groupme_id)
+        if agent_name and not neighbor['agent_name']:
+            neighbor['agent_name'] = agent_name
+        self.set_user_relationship(source=self.node, target=neighbor, cost=cost, verified=True, override=True)
+        self.set_user_relationship(source=neighbor, target=self.node, cost=default_cost, verified=False, override=False)
         
     def add_community_membership(self, community):
         comm = graph.merge_one("Community", "name", community)   

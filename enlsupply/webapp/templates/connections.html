@@ -26,7 +26,10 @@
     -->
     <br>
     <br>
-    <table>
+    
+    <button type="button" id="submit_new_conn">Submit</button>
+    
+    <table class="scroll">
     <thead>
         <tr>
             <th>Connect</th>
@@ -51,7 +54,27 @@
         this message.
     {% endfor %}
     </table>
+  
+    <script>
+    var collect_ids = function(){
+        var ids = [];
+        jQuery('input:checked').each(function(){
+           ids.push(jQuery(this).val());
+        });
+        console.log(ids)
+        return(ids);
+    };
     
+    $(function() {
+      $('button').bind('click', function() {        
+        $.getJSON($SCRIPT_ROOT + '/_submit_new_connections', {
+        groupme_ids: collect_ids
+          }, function(data) { return false;
+        });
+      });
+    });
+    </script>
+  
   {% endif %}
   
 {% endblock %}

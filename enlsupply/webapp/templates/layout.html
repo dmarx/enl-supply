@@ -1,4 +1,14 @@
 <!doctype html>
+<head>
+  <script 
+    src="https://code.jquery.com/jquery-2.2.3.min.js"
+    integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="
+    crossorigin="anonymous">
+  </script>
+  <script type=text/javascript>
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    </script>
+</head>
 <title>ENL Supply Chain</title>
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
 <div class="page">
@@ -8,6 +18,7 @@
     Logged in as {{ session.username }}
     <a href="{{ url_for('logout') }}">Logout</a>
     <br>
+    <a href="{{ url_for('about') }}">about</a>
     <a href="{{ url_for('update_inventory') }}">Inventory</a>
     <a href="{{ url_for('connections') }}">Connections</a>
     <a href="{{ url_for('supply_me') }}">Supply Me</a>

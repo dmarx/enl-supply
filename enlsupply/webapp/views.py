@@ -35,6 +35,8 @@ def update_inventory():
                      for k,v in Inventory(pk=groupme_id, pk_name="groupme_id").nodes.iteritems()]
     return render_template('update_inventory.html', inventory=inventory)
     
+# NB: At present, suggestions aren't even filtered on whether or not a user is already 
+# connected to that person. We should only suggest connections that a user isn't already connected to.
 @app.route('/connections')
 def connections():
     verified_neighbors = None
@@ -44,7 +46,7 @@ def connections():
         verified_neighbors = [neighbor for neighbor,_ in user.verified_neighbors()]
         return render_template('connections.html', 
                                verified_neighbors=verified_neighbors,
-                               suggestions=gm.similar_users(50))
+                               suggestions=gm.similar_users(50)) 
     else:
         return redirect(url_for('index'))
 
@@ -78,7 +80,11 @@ def supply_team():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     return render_template('login.html')
-   
+
+@app.route('/about', methods=['GET'])
+def about():
+    return render_template('about.html')
+    
 @app.route('/_groupme_callback', methods=['GET'])   
 def _groupme_callback():
     access_token = request.args.get('access_token')
@@ -97,6 +103,34 @@ def _groupme_callback():
         print "callback", session['groupme_id']
         flash('Logged in.')
         return redirect(url_for('index'))
+    
+@app.route('/_submit_new_connections')
+def _submit_new_connections():
+    """
+    Receives groupme_ids from connections.html AJAX call. Runs agent 
+    verification (and in the future, !met verification) on each ID. Sends IDs 
+    and agentnames to models.User.add_verified_relationship to create 
+    appropriate edges. Returns list of IDs for whom agent verification (and/or
+    !met verification) was unsuccessful.
+    """
+    print "Message recieved"
+    user_ids = request.args.get('groupme_ids').split(',')
+    access_token = request.args.get('access_token')
+    gm = GroupmeUser(access_token)
+    user = User(session['groupme_id'])
+    verified = []
+    io_verif_fail = []
+    print user_ids
+    print type(user_ids)
+    print(len(user_ids))
+    for id in user_ids:
+        agent = verify_agent(id=id, token=app_token, service='groupme')
+        if agent:
+            print "Adding link {src} -> {tgt}".format(src=user.agent_name, tgt=agent)
+            user.add_verified_relationship(groupme_id=id, agent_name=agent)
+        else:
+            io_verif_fail.append(id)
+    return True
     
 @app.route('/logout')
 def logout():
