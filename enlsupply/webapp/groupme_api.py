@@ -33,11 +33,11 @@ class GroupmeUser(object):
         # * Dict mapping groups to a list of userids/nicknames
         # * a set of ids to be converted to agent names
         # * A dict mapping agent names to their groups
-        data = self._request('/groups')
+        data = self._request('/groups') # I don't know why there wouldn't be data...
+        groups_members = {}
+        members_groups = defaultdict(list)
+        neighbors_nicks = defaultdict(set)
         if data:
-            groups_members = {}
-            members_groups = defaultdict(list)
-            neighbors_nicks = defaultdict(set)
             ids = set()
             for g in data:
                 members = []

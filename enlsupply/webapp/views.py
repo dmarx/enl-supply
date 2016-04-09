@@ -1,5 +1,6 @@
 from models import User, Inventory
-from flask import Flask, request, session, redirect, url_for, render_template, flash
+from flask import Flask, request, session, redirect, url_for, render_template, \
+                  flash, jsonify
 from utilities import verify_agent
 from groupme_api import GroupmeUser
 import os
@@ -130,7 +131,9 @@ def _submit_new_connections():
             user.add_verified_relationship(groupme_id=id, agent_name=agent, cost=1)
         else:
             io_verif_fail.append(id)
-    return redirect(url_for('connections')) 
+    #return redirect(url_for('connections')) 
+    #print "Returning response"
+    return jsonify(result=None)
     # This endpoint is looking for AJAX/json data, so the redirect doesn't do anything.
     
 @app.route('/logout')

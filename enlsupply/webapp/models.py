@@ -63,7 +63,7 @@ class User(SimpleNode):
         # For inherited methods, in particular .find()
         
         self.agent_name = agent_name
-        self.groupme_nick = groupme_nick
+        #self.groupme_nick = groupme_nick
         self.groupme_id = groupme_id
         
         self.pk_name = "groupme_id"
@@ -72,8 +72,9 @@ class User(SimpleNode):
         user = self.merge()
         if agent_name and not user['agent_name']:
             user['agent_name'] = agent_name
-        if groupme_nick and not not user['groupme_nick']:
-            user['groupme_nick'] = groupme_nick
+        self.agent_name = user['agent_name']
+        #if groupme_nick and not not user['groupme_nick']:
+        #    user['groupme_nick'] = groupme_nick
         graph.push(user)
         self._node = user
         self.inventory = Inventory(self.pk, self.pk_name)
