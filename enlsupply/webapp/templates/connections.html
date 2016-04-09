@@ -69,8 +69,20 @@
       $('button').bind('click', function() {        
         $.getJSON($SCRIPT_ROOT + '/_submit_new_connections', {
         groupme_ids: collect_ids
-          }, function(data) { return false;
+          }, function(data) { 
+          return false;
         });
+      // this is a very dirty way of doing this...
+          //window.location.reload();
+          //window.location.href=window.location.href;
+          //document.location.reload();
+          
+          /*
+           Doesn't matter. Doesn't work anyway.
+           If I put this inside the callback funciton, nothing happens.
+           If I put it "after" the callback function, the page reloads before 
+           the data ever gets sent.
+          */
       });
     });
     </script>
