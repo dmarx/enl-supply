@@ -3,14 +3,31 @@
 {% block body %}
   {% if session.username %}
   <h3>Connections</h3>
-    <ul>
+        <table class="scroll">
+    <thead>
+        <tr>
+            <th>Agent</th>
+            <th>Disconnect</th>
+        </tr>
+    </thead>
+    <tbody>
     {% for agent in verified_neighbors %}
-      <li> {{ agent.agent_name }} </li>
+      <tr>
+        <td> {{ agent.agent_name }} </td>
+        <td> <input type="checkbox" class="sugg" name="{{ agent.groupme_id }}" value="{{ agent.groupme_id }}"> </td>
+        <!-- these empty cells are just a shitty spacing hack cause I suck at webdesign -->
+        <td></td> 
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
     {% else %}
       You currently are not connected to any other agents. Register connections
       to agents you can easily meet with for gear exchange suggestions.
     {% endfor %}
-    </ul>
+    </tbody>
+    </table>
   
   <h3>Suggested Connections</h3>
   
@@ -38,10 +55,11 @@
             <th>Shared groups</th>
         </tr>
     </thead>
+    <tbody>
     {% for suggestion in suggestions %}
         <tr>
             <td>
-                <input type="checkbox" name="{{ suggestion.id }}" value="{{ suggestion.id }}">
+                <input type="checkbox" class="sugg" name="{{ suggestion.id }}" value="{{ suggestion.id }}">
             </td>
             <td>{{ suggestion.nickname |join('<br>') | safe}}</td>
             <td>{{ suggestion.n_groups }}</td>
@@ -50,12 +68,13 @@
     {% else %}
         Unable to get your GroupMe groups. Try reloading the page.
     {% endfor %}
+    </tbody>
     </table>
   
     <script>
     var collect_ids = function(){
         var ids = [];
-        jQuery('input:checked').each(function(){
+        jQuery('input.sugg:checked').each(function(){
            ids.push(jQuery(this).val());
         });
         console.log(ids)
