@@ -6,17 +6,95 @@
     {% include "list_current_inventory.html" %}
 
     <h3>Add Inventory</h3>
-    <form action="{{ url_for('add_inventory') }}" method="post">
-        <dl>
-            <dt>Type:</dt>
-            <dd><input type="text" size="30" name="type"></dd>
-            <dt>Level:</dt>
-            <dd><input type="text" size="30" name="level"></dd>
-            <dt>Value:</dt>
-            <dd><input type="text" size="30" name="value"></dd>
-        </dl>
-        <input type="submit" value="Submit">
-    </form>
+    nter a positive "amount" to indicate your excess supply, or a negative number to indicate your demand. To delete inventory, enter the amount as "0".
+    <br>
+    <br>
+    
+    
+    <style>
+    #level option{
+    display:none;
+}
+
+#level option.label{
+    display:block;
+}
+    </style>
+    
+    <form id="formname" name="formname" method="post" action="{{ url_for('add_inventory') }}" >
+    <table width="50%" border="0" cellspacing="0" cellpadding="5">
+      <tr>
+        <td width="41%" align="right" valign="middle">Item Type :</td>
+        <td width="59%" align="left" valign="middle">
+          <select name="type" id="type">
+            <option value=""></option>
+            <option value="xmp">XMP Bursters</option>
+            <option value="sh">Shields</option>
+            <option value="res">Resonators</option>
+            <option value="fat">Force Amps/Turrets</option>
+            <option value="la">Link Amps</option>
+            <option value="pc">Power Cubes</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td align="right" valign="middle">Level :</td>
+        <td align="left" valign="middle">
+          <select disabled="disabled" id="level" name="level">
+            <option value></option>
+            <option rel="numeric" value="1">1</option>
+            <option rel="numeric" value="2">2</option>
+            <option rel="numeric" value="3">3</option>
+            <option rel="numeric" value="4">4</option>
+            <option rel="numeric" value="5">5</option>
+            <option rel="numeric" value="6">6</option>
+            <option rel="numeric" value="7">7</option>
+            <option rel="numeric" value="8">8</option>
+            <!---->
+            <option rel="discrete" value="c">Common</option>
+            <option rel="discrete" value="r">Rare</option>
+            <option rel="discrete" value="vr">Very Rare</option>
+            <option rel="discrete" value="sp">Special (AXA/Lawson/SBUL)</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td align="right" valign="middle">Amount :</td>
+        <td align="left" valign="middle">
+            <input type="text" name="value">
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <input type="submit" value="Submit">
+        </td>
+      </tr
+    </table>
+    
+  </form>
+  
+  <script>
+  $(function(){
+    
+    var $cat = $("#type"),
+        $subcat = $("#level");
+    
+    $cat.on("change",function(){
+        var _rel = $(this).val();
+        $subcat.find("option").attr("style","");
+        $subcat.val("");
+        if(!_rel) return $subcat.prop("disabled",true);
+        if( (['xmp','res','pc'].indexOf(_rel) > -1) ){
+        	var _cat = 'numeric'
+        } else {
+          var _cat = 'discrete'
+        }
+        $subcat.find("[rel="+_cat+"]").show();
+        $subcat.prop("disabled",false);
+    });
+    
+});
+  </script>
   {% else %}
     {% include "login.html" %}
   {% endif %}
