@@ -10,7 +10,7 @@
             <th>Disconnect</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody class="scroll">
     {% for agent in verified_neighbors %}
       <tr>
         <td> {{ agent.agent_name }} </td>
@@ -55,7 +55,7 @@
             <th>Shared groups</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody class="scroll">
     {% for suggestion in suggestions %}
         <tr>
             <td>
