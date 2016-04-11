@@ -1,8 +1,8 @@
 import requests
-#from utilities import verify_agent
 from collections import defaultdict
 
 class GroupmeUser(object):
+    jarvis_id = '15678427'
     def __init__(self, user_token, app_token=None):
         self.user_token = user_token
         self.app_token  = app_token
@@ -44,6 +44,13 @@ class GroupmeUser(object):
                 for user in g['members']:
                     id = user['user_id']
                     members.append(id)
+                # If Roland Jarvis is not in a group, it's not managed by enl.io 
+                # and we should ignore the whole group to ensure we are only
+                # suggesting ingress (enl) agents.
+                if self.jarvis_id not in members:
+                    continue
+                for user in g['members']:
+                    id = user['user_id']
                     members_groups[id].append(g['name'])
                     neighbors_nicks[id].add(user['nickname'])
                     ids.add(id)
@@ -55,21 +62,6 @@ class GroupmeUser(object):
         self.groups_members = groups_members
         self.members_groups = members_groups
         self.neighbors_nicks = neighbors_nicks
-        #self.neighbors_names = self.map_ids_to_agents(ids)
-        # I don't need to convert GM nicknames to agent names until after
-        # the user specifies which agents/groups they want to use to populate
-        # the graph.
-    def map_ids_to_agents(self, ids):
-        d = {}
-        for id in ids:
-            # Before hitting enl.io, we should probably check our database to
-            # reduce the number of requests we're throwing at them.
-            # Should I keep a separate database and/or attach to the graph as a
-            # node attribute? I think i shold probably at least attach to the graph. 
-            # I guess the question is if I should keep a separate database 
-            # mapping agent names to gm ids.
-            d[id] = verify_agent(id, self.app_token, service='groupme')
-        return d
     def similar_users(self,k=10):
         if not hasattr(self, 'members_groups'):
             self.get_groups()
@@ -77,12 +69,13 @@ class GroupmeUser(object):
             k=len(self.members_groups)
         k=k+2
         sugg = sorted(self.members_groups.iteritems(), key=lambda x: -len(x[1]))[1:k]
+        print type(self.id), self.id
         return [{'nickname':self.neighbors_nicks[id], 
                  'n_groups':len(groups),
                  'groups':groups,
                  'id':id
                  } for id, groups in sugg 
-                 if id != '15678427'] # Ignore Jarvis
+                 if id not in (self.jarvis_id,self.id)]
             
 if __name__ == '__main__':
     demo_token = None

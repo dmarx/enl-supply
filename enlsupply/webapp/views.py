@@ -69,8 +69,8 @@ def supply_me():
     return render_template('supply_me.html', paths=paths, inventory=inventory)
     
 
-@app.route('/supply_team')
-def supply_team():
+@app.route('/unload_me')
+def unload_me():
     paths = None
     if session.has_key('username'):
         user = User(session['groupme_id'])
@@ -78,7 +78,7 @@ def supply_team():
                      for k,v in user.inventory.nodes.iteritems()]
         paths,_ = user.supply_paths(direction='out')
         paths = sorted(paths, key=lambda k: (k['cost'], k['path'][1]['username']))
-    return render_template('supply_team.html', paths=paths, inventory=inventory)
+    return render_template('unload_me.html', paths=paths, inventory=inventory)
     
 # the connections, supply_me, supply_team endpoints are all very similar. Could
 # probably DRY out my code with a custom decorator or factory function or something.
