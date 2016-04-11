@@ -118,7 +118,7 @@ def _groupme_callback():
         User(groupme_id = gm.id, groupme_nick=gm.nickname, agent_name=username)
         print "callback", session['groupme_id']
         flash('Logged in.')
-        return redirect(url_for('index'))
+        return redirect(url_for('index', _external=True))
     
 @app.route('/_submit_new_connections')
 def _submit_new_connections():
