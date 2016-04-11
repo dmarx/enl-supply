@@ -88,19 +88,13 @@
           }, function(data) { 
           //return false;
           console.log("success");
-          window.location.reload();
+          window.location.reload(); 
+          // this is a very dirty way of doing this...
+          // I could probably just ditch this whole AJAX-style approach in favor 
+          // of replicating the submit-refresh system used on 
+          // update_inventory.html. Ultimately AJAX is the way to go, but for 
+          // now I can KISS.
         });
-      // this is a very dirty way of doing this...
-          //window.location.reload();
-          //window.location.href=window.location.href;
-          //document.location.reload();
-          
-          /*
-           Doesn't matter. Doesn't work anyway.
-           If I put this inside the callback funciton, nothing happens.
-           If I put it "after" the callback function, the page reloads before 
-           the data ever gets sent.
-          */
       });
     });
     </script>
