@@ -18,6 +18,15 @@ app = Flask(__name__)
 # Seems like it would reduce requests to the database if we keep a pointer to
 # the bound user node instead of querying the database every time we want it.
 
+@app.route('/test')
+def test():
+    print url_for('_hello_world', _external=True)
+    return redirect(url_for('_hello_world', _external=True))
+
+@app.route('/_hello_world')
+def _hello_world():
+    return 'Hello World!'
+
 @app.route('/')
 def index():
     inventory = None
