@@ -1,11 +1,11 @@
 body            { font-family: sans-serif; background: #eee; }
-a, h1, h3       { color: #377ba8; }
+a, h1, h3       { color: #377ba8;text-decoration:none;}
+a:visited 		{ color: #377ba8; }
 h1, h2, h3      { font-family: 'Georgia', serif; margin: 0; }
 h1, h2          { border-bottom: 2px solid #eee; padding: 3px; }
 h3              { padding: 3px; }
 dd              { display: block; margin-left: 0px; }
 dl              { font-weight: bold; }
-a:visited 		{ color: #800080; }
 .page           { margin: 2em auto; width: 35em; border: 5px solid #ccc; padding: 0.8em; background: white; }
 .posts          { list-style: none; margin: 0; padding: 0; }
 .posts li       { margin: 0.8em 1.2em; }
@@ -14,11 +14,16 @@ a:visited 		{ color: #800080; }
 .flash          { background: #cee5F5; padding: 0.5em; border: 1px solid #aacbe2; }
 .error          { background: #f0d6d6; padding: 0.5em; }
 
+
+
 /* Make table scrollable 
    http://stackoverflow.com/questions/17067294/html-table-with-100-width-with-vertical-scroll-inside-tbody
 */
 
-thead, tbody { display: block; }
+/*thead, tbody { display: block; }*/
+
+thead { display: table-header-group; }
+tbody { display: table-row-group; }
 
 tbody.scroll {
     height: 300px;       /* Just for the demo          */

@@ -12,13 +12,13 @@
 <title>ENL Supply Chain</title>
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
 <div class="page">
-  <h1>ENL Supply Chain</h1>
+  <h1><a href="{{ url_for('index') }}";>ENL Supply Chain</a></h1>
   <div class="metanav">
   {% if session.username %}
     Logged in as {{ session.username }}
     <a href="{{ url_for('logout') }}">Logout</a>
     <br>
-    <a href="{{ url_for('about') }}">about</a>
+    <a href="{{ url_for('about') }}">About</a>
     <a href="{{ url_for('update_inventory') }}">Inventory</a>
     <a href="{{ url_for('connections') }}">Connections</a>
     <a href="{{ url_for('supply_me') }}">Supply Me</a>
