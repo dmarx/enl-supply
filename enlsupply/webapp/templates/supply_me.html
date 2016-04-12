@@ -19,11 +19,11 @@
     <tbody>
     {% for rec in paths %}
     <tr>
-      <td> {{ rec.terminus.displayname }} </td>
+      <td> {{ rec.terminus.agent_name }} </td>
       <td> {{ rec.supply.type }}  </td>
       <td> {{ rec.supply.level }} </td> 
       <td> {{ rec.supply.value }} </td>
-      <td> {{ rec.path | map(attribute='displayname') | join(' <-- ') }} </td>
+      <td> {{ rec.path | map(attribute='agent_name') | join(' <-- ') }} </td>
     </tr>
     {% else %}
       No one within two "steps" of you has gear you need.
