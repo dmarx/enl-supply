@@ -31,3 +31,5 @@ tbody.scroll {
     overflow-x: hidden;  /* Hide the horizontal scroll */
 }
 
+table {border-collapse: collapse;}
+th, td {border: 1px solid #ddd;}
