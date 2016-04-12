@@ -277,7 +277,9 @@ class Inventory(SimpleNode):
               'fa',  # Force Amp
               'tur', # Turret
               'us',  # Ultra Strike
-              'sh']  # Shield
+              'sh',  # Shield
+              'hs',  # Heat Shield
+              'mh']  # Multihack
     
     def __init__(self, pk, pk_name, attached_node_type='User'):
         self.pk = pk
