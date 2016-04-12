@@ -1,6 +1,7 @@
 from models import User, Inventory, ConnectionSuggesterGM
-from flask import Flask, request, session, redirect, url_for, render_template, \
+from flask import Flask, request, session, redirect, render_template, \
                   flash, jsonify
+from flask import url_for as base_url_for # to override
 from utilities import verify_agent
 from groupme_api import GroupmeUser
 import os
@@ -17,6 +18,14 @@ app = Flask(__name__)
 # Is there any reason why Nicole doesn't attach the User object to the session?
 # Seems like it would reduce requests to the database if we keep a pointer to
 # the bound user node instead of querying the database every time we want it.
+
+
+def url_for(url_rule, **kwargs):
+    kwargs.setdefault('_external', True)
+    kwargs.setdefault('_scheme', 'https')
+    return base_url_for(url_rule, **kwargs)
+
+app.jinja_env.globals['url_for'] = url_for
 
 @app.route('/test')
 def test():
