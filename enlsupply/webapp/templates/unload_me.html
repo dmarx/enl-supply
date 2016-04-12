@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+
+{% block body %}
+  {% if session.username %}
+  
+  {% include "list_current_inventory.html" %}
+  
+  <h3>Supply lines</h3>
+  <table class="inventory">
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Type</th>
+        <th>Level</th>
+        <th>Count</th>
+        <th>Path</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for rec in paths %}
+    <tr>
+      <td> {{ rec.terminus.displayname }} </td>
+      <td> {{ rec.supply.type }}  </td>
+      <td> {{ rec.supply.level }} </td> 
+      <td> {{ rec.supply.value }} </td>
+      <td> {{ rec.path | map(attribute='displayname') | join(' --> ') }} </td>
+    </tr>
+    {% else %}
+      No one within two "steps" of you needs gear you're offering.
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+{% endblock %}
