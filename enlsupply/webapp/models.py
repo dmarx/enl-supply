@@ -293,6 +293,7 @@ class Inventory(SimpleNode):
         MATCH (user:User)-[r:HAS]->(b:Inventory)
         WHERE user.{pk_name} = {{{pk_name}}}
         RETURN b
+        ORDER BY b.type, b.level
         """.format(pk_name=self.pk_name)
         print query
         d={}
