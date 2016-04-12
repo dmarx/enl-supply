@@ -3,6 +3,7 @@ from datetime import datetime
 import os
 import uuid
 from groupme_api import GroupmeUser
+from collections import OrderedDict
 #import sqlite3 # Create a separate database to track TTL
 # You know what, I'll implement TTL later.
 
@@ -296,7 +297,7 @@ class Inventory(SimpleNode):
         ORDER BY b.type, b.level
         """.format(pk_name=self.pk_name)
         print query
-        d={}
+        d = OrderedDict()
         results = graph.cypher.execute(query, {self.pk_name:self.pk})
         for record in results:
             node = record[0]
