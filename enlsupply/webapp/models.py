@@ -263,7 +263,6 @@ class User(SimpleNode):
                         path.append(q)
                 paths.append(path)
                 
-            print "paths", paths
             supply_chains.append({'path':paths, 'inventory':source_costs[terminus[self.pk_name]]['inventory'], 
                                   'terminus':terminus, 'cost':rec.totCost})
         

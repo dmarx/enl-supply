@@ -112,7 +112,7 @@ def unload_me():
         inventory = [{'type':k[0], 'level':k[1], 'value':v['value']} 
                      for k,v in user.inventory.nodes.iteritems()]
         paths,_ = user.supply_paths(direction='out')
-        paths = sorted(paths, key=lambda k: (k['cost'], k['path'][1]['username']))
+        paths = sorted(paths, key=lambda k: (k['cost'], k['terminus']))
     return render_template('unload_me.html', paths=paths, inventory=inventory, item_map=item_map)
     
 # the connections, supply_me, supply_team endpoints are all very similar. Could

@@ -10,20 +10,35 @@
     <thead>
       <tr>
         <th>User</th>
-        <th>Type</th>
-        <th>Level</th>
-        <th>Count</th>
-        <th>Path</th>
+        <th>Items</th>
+        <th>Paths</th>
       </tr>
     </thead>
     <tbody>
     {% for rec in paths %}
     <tr>
-      <td> {{ rec.terminus.agent_name }} </td>
-      <td> {{ rec.supply.type }}  </td>
-      <td> {{ rec.supply.level }} </td> 
-      <td> {{ rec.supply.value }} </td>
-      <td> {{ rec.path | map(attribute='agent_name') | join(' --> ') }} </td>
+
+      <td> {{ rec.terminus.agent_name}} </td>
+      <td>
+        <table>
+          {% for item in rec.inventory%}
+            <tr>
+              <td>{{ item.type  }}</td>
+              <td>{{ item.level }}</td>
+              <td>{{ item.value }}</td>
+            </tr>
+          {% endfor %}
+        </table>
+      </td>
+      
+      <td>
+        <table>
+          {% for path in rec.path%}
+            <tr><td>{{ path | map(attribute='agent_name') | join(' --> ') }}</td></tr>
+          {% endfor %}
+        </table>
+      </td>
+      
     </tr>
     {% else %}
       No one within two "steps" of you needs gear you're offering.
