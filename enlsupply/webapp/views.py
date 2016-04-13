@@ -100,7 +100,7 @@ def supply_me():
         inventory = [{'type':k[0], 'level':k[1], 'value':v['value']} 
                      for k,v in user.inventory.nodes.iteritems()]
         paths,_ = user.supply_paths(direction='in')
-        paths = sorted(paths, key=lambda k: (k['cost'], k['path'][1]['username']))
+        paths = sorted(paths, key=lambda k: (k['cost'], k['terminus']))
     return render_template('supply_me.html', paths=paths, inventory=inventory, item_map=item_map)
     
 

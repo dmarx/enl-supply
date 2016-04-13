@@ -3,7 +3,7 @@ from datetime import datetime
 import os
 import uuid
 from groupme_api import GroupmeUser
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 #import sqlite3 # Create a separate database to track TTL
 # You know what, I'll implement TTL later.
 
@@ -217,8 +217,9 @@ class User(SimpleNode):
         where a.{pk_name}={{{pk_name}}}
         and supply.type = demand.type 
         and SIGN(demand.value) {s3} SIGN(supply.value) 
-        return terminus, min(reduce(tot=0, r in chain | tot + r.cost)) AS minCost
+        return terminus, COLLECT(DISTINCT supply) as inventory, min(reduce(tot=0, r in chain | tot + r.cost)) AS minCost
         """.format(s1=s1, s2=s2, s3=s3, radius=radius, pk_name=self.pk_name)
+        print query, {self.pk_name:self.pk}
         min_path_cost = graph.cypher.execute(query, {self.pk_name:self.pk})
         
         query="""
@@ -226,12 +227,12 @@ class User(SimpleNode):
         where a.{pk_name}={{{pk_name}}}
         and supply.type = demand.type 
         and SIGN(demand.value) {s3} SIGN(supply.value)  
-        RETURN terminus, chain, supply, reduce(tot=0, r in chain | tot + r.cost) as totCost
+        RETURN terminus, chain, reduce(tot=0, r in chain | tot + r.cost) as totCost
         ORDER BY totCost
         """.format(s1=s1, s2=s2, s3=s3, radius=radius, pk_name=self.pk_name)
         paths = graph.cypher.execute(query, {self.pk_name:self.pk})
         
-        source_costs = dict((rec.terminus[self.pk_name], rec.minCost) for rec in min_path_cost)
+        source_costs = dict((rec.terminus[self.pk_name], {'minCost':rec.minCost, 'inventory':rec.inventory}) for rec in min_path_cost)
 
         return self._filter_paths(paths, source_costs, direction)
         
@@ -239,34 +240,32 @@ class User(SimpleNode):
         """ filter paths down to paths with the least weight between two nodes in the event
         that several paths with the same source and target are returned.
         """
-        best_paths = []
+        best_paths = defaultdict(list)
         for rec in paths:
-            if rec.totCost == source_costs[rec.terminus[self.pk_name]]:
-                best_paths.append(rec)
+            if rec.totCost == source_costs[rec.terminus[self.pk_name]]['minCost']:
+                best_paths[rec.terminus].append(rec)
                 
         # Expand the 'chain'
         supply_chains = []
-        for rec in best_paths:
-            path = []
-            for rel in rec.chain:
-                #path.extend(rel.nodes)
-                if direction == 'in':
-                    q,p = rel.nodes
-                else:
-                    p,q = rel.nodes
-                ######## This probably belongs elsewhere #####
-                #if not p['displayname']:
-                #    p['displayname'] = p['username']
-                #if not q['displayname']:
-                #    q['displayname'] = q['username']
-                ###############################################
-                if not path:
-                    path =[p,q]
-                else:
-                    path.append(q)
+        for terminus, recs in best_paths.iteritems():        
+            paths = []
+            for rec in recs:
+                path = []
+                for rel in rec.chain:
+                    #path.extend(rel.nodes)
+                    if direction == 'in':
+                        q,p = rel.nodes
+                    else:
+                        p,q = rel.nodes
+                    if not path:
+                        path =[p,q]
+                    else:
+                        path.append(q)
+                paths.append(path)
                 
-            supply_chains.append({'path':path, 'supply':rec.supply, 
-                                  'terminus':rec.terminus, 'cost':rec.totCost})
+            print "paths", paths
+            supply_chains.append({'path':paths, 'inventory':source_costs[terminus[self.pk_name]]['inventory'], 
+                                  'terminus':terminus, 'cost':rec.totCost})
         
         return supply_chains, best_paths
         
