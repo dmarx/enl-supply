@@ -36,6 +36,8 @@
             <option value="pc">Power Cubes</option>
             <option value="hs">Heat Sinks</option>
             <option value="mh">Multi-Hacks</option>
+            <option value="jarvis">Jarvis Virus</option>
+            <option value="ada">ADA Virus</option>
           </select>
         </td>
       </tr>
@@ -57,6 +59,8 @@
             <option rel="discrete" value="r">Rare</option>
             <option rel="discrete" value="vr">Very Rare</option>
             <option rel="discrete" value="sp">Special (AXA/Lawson/SBUL)</option>
+            <!---->
+            <option rel="virus" value="vr">Very Rare</option>
           </select>
         </td>
       </tr>
@@ -87,9 +91,11 @@
         $subcat.val("");
         if(!_rel) return $subcat.prop("disabled",true);
         if( (['xmp','res','pc'].indexOf(_rel) > -1) ){
-        	var _cat = 'numeric'
+          var _cat = 'numeric';
+        } else if (['ada','jarvis'].indexOf(_rel) > -1){
+          var _cat = 'virus';
         } else {
-          var _cat = 'discrete'
+          var _cat = 'discrete';
         }
         $subcat.find("[rel="+_cat+"]").show();
         $subcat.prop("disabled",false);

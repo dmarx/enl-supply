@@ -20,12 +20,16 @@ app = Flask(__name__)
 # the bound user node instead of querying the database every time we want it.
 
 
-def url_for(url_rule, **kwargs):
-    kwargs.setdefault('_external', True)
-    kwargs.setdefault('_scheme', 'https')
-    return base_url_for(url_rule, **kwargs)
+if os.name == 'posix': # Assume this means we're running on the server.
+    print "Overriding url_for to force HTTPS"
+    def url_for(url_rule, **kwargs):
+        kwargs.setdefault('_external', True)
+        kwargs.setdefault('_scheme', 'https')
+        return base_url_for(url_rule, **kwargs)
 
-app.jinja_env.globals['url_for'] = url_for
+    app.jinja_env.globals['url_for'] = url_for
+else:
+    url_for = base_url_for
 
 @app.route('/test')
 def test():
@@ -127,7 +131,7 @@ def _groupme_callback():
         User(groupme_id = gm.id, groupme_nick=gm.nickname, agent_name=username)
         print "callback", session['groupme_id']
         flash('Logged in.')
-        return redirect(url_for('index', _external=True))
+        return redirect(url_for('index'))
     
 @app.route('/_submit_new_connections')
 def _submit_new_connections():
