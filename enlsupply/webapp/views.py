@@ -6,6 +6,7 @@ from utilities import verify_agent
 from groupme_api import GroupmeUser
 import os
 from ConfigParser import ConfigParser
+from collections import OrderedDict
 #from flask_oauth import OAuth
 
 config = ConfigParser()
@@ -48,6 +49,18 @@ def index():
         inventory = [{'type':k[0], 'level':k[1], 'value':v['value']} 
                      for k,v in Inventory(pk=groupme_id, pk_name="groupme_id").nodes.iteritems()]
     return render_template('index.html', inventory=inventory)
+    
+item_map = {"xmp":'XMP Bursters',
+            "sh":'Shields',
+            "res":'Resonators',
+            "fat":'Force Amps/Turrets',
+            "la":'Link Amps',
+            "pc":'Power Cubes',
+            "hs":'Heat Sinks',
+            "mh":'Multi-Hacks',
+            "jarvis":'Jarvis Virus',
+            "ada":'ADA Virus'}
+item_map = OrderedDict(sorted(item_map.iteritems(), key=lambda x: x[0]))
 
 @app.route('/update_inventory')
 def update_inventory():
@@ -56,7 +69,7 @@ def update_inventory():
         groupme_id = session['groupme_id']
         inventory = [{'type':k[0], 'level':k[1], 'value':v['value']} 
                      for k,v in Inventory(pk=groupme_id, pk_name="groupme_id").nodes.iteritems()]
-    return render_template('update_inventory.html', inventory=inventory)
+    return render_template('update_inventory.html', inventory=inventory, item_map=item_map)
     
 # NB: At present, suggestions aren't even filtered on whether or not a user is already 
 # connected to that person. We should only suggest connections that a user isn't already connected to.
@@ -88,7 +101,7 @@ def supply_me():
                      for k,v in user.inventory.nodes.iteritems()]
         paths,_ = user.supply_paths(direction='in')
         paths = sorted(paths, key=lambda k: (k['cost'], k['path'][1]['username']))
-    return render_template('supply_me.html', paths=paths, inventory=inventory)
+    return render_template('supply_me.html', paths=paths, inventory=inventory, item_map=item_map)
     
 
 @app.route('/unload_me')
@@ -100,7 +113,7 @@ def unload_me():
                      for k,v in user.inventory.nodes.iteritems()]
         paths,_ = user.supply_paths(direction='out')
         paths = sorted(paths, key=lambda k: (k['cost'], k['path'][1]['username']))
-    return render_template('unload_me.html', paths=paths, inventory=inventory)
+    return render_template('unload_me.html', paths=paths, inventory=inventory, item_map=item_map)
     
 # the connections, supply_me, supply_team endpoints are all very similar. Could
 # probably DRY out my code with a custom decorator or factory function or something.

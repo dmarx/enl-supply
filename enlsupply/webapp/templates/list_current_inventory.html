@@ -11,7 +11,7 @@
   <tbody>
   {% for row in inventory %}
     <tr>
-      <td>{{ row.type }}</td>
+      <td>{{ item_map[row.type] }}</td>
       <td>{{ row.level }}</td>
       <td>{{ row.value }}</td>
     </tr>
