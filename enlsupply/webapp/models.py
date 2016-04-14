@@ -216,6 +216,7 @@ class User(SimpleNode):
         MATCH (demand)<-[:HAS]-(a){s1}-[chain:CAN_REACH*1..{radius}]-{s2}(terminus)-[:HAS]-(supply) 
         where a.{pk_name}={{{pk_name}}}
         and supply.type = demand.type 
+        and supply.level = demand.level
         and SIGN(demand.value) {s3} SIGN(supply.value) 
         return terminus, COLLECT(DISTINCT supply) as inventory, min(reduce(tot=0, r in chain | tot + r.cost)) AS minCost
         """.format(s1=s1, s2=s2, s3=s3, radius=radius, pk_name=self.pk_name)
@@ -226,6 +227,7 @@ class User(SimpleNode):
         MATCH (demand)<-[:HAS]-(a){s1}-[chain:CAN_REACH*1..{radius}]-{s2}(terminus)-[:HAS]-(supply) 
         where a.{pk_name}={{{pk_name}}}
         and supply.type = demand.type 
+        and supply.level = demand.level
         and SIGN(demand.value) {s3} SIGN(supply.value)  
         RETURN terminus, chain, reduce(tot=0, r in chain | tot + r.cost) as totCost
         ORDER BY totCost
@@ -244,13 +246,16 @@ class User(SimpleNode):
         for rec in paths:
             if rec.totCost == source_costs[rec.terminus[self.pk_name]]['minCost']:
                 best_paths[rec.terminus].append(rec)
-                
+
+        
         # Expand the 'chain'
         supply_chains = []
         for terminus, recs in best_paths.iteritems():        
             paths = []
+            paths_seen = {}
             for rec in recs:
                 path = []
+                path_names =  []
                 for rel in rec.chain:
                     #path.extend(rel.nodes)
                     if direction == 'in':
@@ -259,10 +264,16 @@ class User(SimpleNode):
                         p,q = rel.nodes
                     if not path:
                         path =[p,q]
+                        path_names = [p.ref, q.ref]
                     else:
                         path.append(q)
-                paths.append(path)
-                
+                        path_names.append(q.ref)
+                path_names = tuple(path_names)
+                if not paths_seen.has_key(path_names):
+                    paths.append(path)
+                    paths_seen[path_names] = 1
+            #paths = set(tuple(x) for x in paths) # Doesn't work. Should do this on the database
+            #paths = dedupe(paths)
             supply_chains.append({'path':paths, 'inventory':source_costs[terminus[self.pk_name]]['inventory'], 
                                   'terminus':terminus, 'cost':rec.totCost})
         
