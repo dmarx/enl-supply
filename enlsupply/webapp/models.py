@@ -289,7 +289,8 @@ class Inventory(SimpleNode):
               'us',  # Ultra Strike
               'sh',  # Shield
               'hs',  # Heat Sink
-              'mh']  # Multihack
+              'mh',  # Multihack
+              'us']  # Ultrastrike
     
     def __init__(self, pk, pk_name, attached_node_type='User'):
         self.pk = pk

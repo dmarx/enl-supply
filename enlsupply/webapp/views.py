@@ -59,7 +59,9 @@ item_map = {"xmp":'XMP Bursters',
             "hs":'Heat Sinks',
             "mh":'Multi-Hacks',
             "jarvis":'Jarvis Virus',
-            "ada":'ADA Virus'}
+            "ada":'ADA Virus',
+            "us",'Ultrastrikes'
+            }
 item_map = OrderedDict(sorted(item_map.iteritems(), key=lambda x: x[0]))
 
 @app.route('/update_inventory')

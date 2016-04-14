@@ -31,18 +31,6 @@
             {% for k,v in item_map.iteritems() %}
                 <option value="{{k}}">{{v}}</option>
             {% endfor %}
-            <!--
-            <option value="xmp">XMP Bursters</option>
-            <option value="sh">Shields</option>
-            <option value="res">Resonators</option>
-            <option value="fat">Force Amps/Turrets</option>
-            <option value="la">Link Amps</option>
-            <option value="pc">Power Cubes</option>
-            <option value="hs">Heat Sinks</option>
-            <option value="mh">Multi-Hacks</option>
-            <option value="jarvis">Jarvis Virus</option>
-            <option value="ada">ADA Virus</option>
-            -->
           </select>
         </td>
       </tr>
@@ -95,7 +83,7 @@
         $subcat.find("option").attr("style","");
         $subcat.val("");
         if(!_rel) return $subcat.prop("disabled",true);
-        if( (['xmp','res','pc'].indexOf(_rel) > -1) ){
+        if( (['xmp','res','pc','us'].indexOf(_rel) > -1) ){
           var _cat = 'numeric';
         } else if (['ada','jarvis'].indexOf(_rel) > -1){
           var _cat = 'virus';
