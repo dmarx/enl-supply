@@ -60,7 +60,7 @@ item_map = {"xmp":'XMP Bursters',
             "mh":'Multi-Hacks',
             "jarvis":'Jarvis Virus',
             "ada":'ADA Virus',
-            "us",'Ultrastrikes'
+            "us":'Ultrastrikes'
             }
 item_map = OrderedDict(sorted(item_map.iteritems(), key=lambda x: x[0]))
 
