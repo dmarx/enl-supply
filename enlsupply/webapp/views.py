@@ -80,13 +80,8 @@ def connections():
     verified_neighbors = None
     if session.has_key('username'):
         user = User(session['groupme_id'])
-        #gm = GroupmeUser(session['groupme_token'])
-        #verified_neighbors = [neighbor for neighbor,_ in user.verified_neighbors()]
-        #suggestions = gm.similar_users(50)
         sugg = ConnectionSuggesterGM(session['groupme_id'], session['groupme_token'])
-        verified_neighbors = [neighbor for neighbor,_ in sugg.user.verified_neighbors()]
-        #verified_neighbors.sort()
-        verified_neighbors = sorted(verified_neighbors, key=lambda x: x['agent_name'].lower())
+        verified_neighbors = sorted(sugg.user.verified_neighbors(), key=lambda rec: rec[0]['agent_name'].lower())
         suggestions = sugg.new_connections()
         return render_template('connections.html', 
                                verified_neighbors=verified_neighbors,
@@ -160,9 +155,6 @@ def _submit_new_connections():
     print "Message recieved"
     
     access_token = request.args.get('access_token')
-    #access_token2 = session['access_token']
-    #print "token1", access_token 
-    #print "token2", access_token2 
     gm = GroupmeUser(access_token)
     user = User(session['groupme_id'])
     

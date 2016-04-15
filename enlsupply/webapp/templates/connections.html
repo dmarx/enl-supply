@@ -7,17 +7,18 @@
     <thead>
         <tr>
             <th>Agent</th>
+            <th>Convenience</th>
             <th>Disconnect</th>
         </tr>
     </thead>
     <tbody class="scroll">
-    {% for agent in verified_neighbors %}
+    {% for agent, path in verified_neighbors %}
       <tr>
         <td> {{ agent.agent_name }} </td>
-        <td> 
+        <td> {{ path.cost }} </td>
         
+        <td>
         <input type="checkbox" class="sugg" name="{{ agent.groupme_id }}" value="{{ agent.groupme_id }}">
-        
         </td>
       </tr>
     {% else %}
