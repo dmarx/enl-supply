@@ -2,6 +2,17 @@
 
 {% block body %}
   {% if session.username %}
+  
+  {% set conv_map_tuples = [("6",'<6 hrs'),
+                            ("12",'<12 hrs'),
+                            ("24",'<24 hrs'),
+                            ("48",'<48 hrs'),
+                            ("72",'<72 hrs'),
+                            ("168",'<1 week')]
+  %}
+  
+  {% set convenience_map = dict(conv_map_tuples) %}
+  
   <h3>Connections</h3>
         <table class="scroll">
     <thead>
@@ -15,7 +26,7 @@
     {% for agent, path in verified_neighbors %}
       <tr>
         <td> {{ agent.agent_name }} </td>
-        <td> {{ path.cost }} </td>
+        <td> {{ convenience_map[path.cost] }} </td>
         
         <td>
         <input type="checkbox" class="sugg" name="{{ agent.groupme_id }}" value="{{ agent.groupme_id }}">
@@ -60,12 +71,9 @@
             <td>
               <select id="new_agent_id" class="sugg" name="{{ suggestion.id }}">
                 <option value></option>
-                <option value="6"><6 hrs</option>
-                <option value="12"><12 hrs</option>
-                <option value="24"><24 hrs</option>
-                <option value="48"><48 hrs</option>
-                <option value="72"><72 hrs</option>
-                <option value="168"><1 week</option>
+                {% for val,descr in conv_map_tuples %}
+                    <option value="{{val}}">{{descr}}</option>
+                {% endfor %}
               </select>
             </td>
             <td>{{ suggestion.nickname |join('<br>') | safe}}</td>
