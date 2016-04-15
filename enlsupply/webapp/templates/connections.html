@@ -3,44 +3,63 @@
 {% block body %}
   {% if session.username %}
   
-  {% set conv_map_tuples = [("6",'<6 hrs'),
-                            ("12",'<12 hrs'),
-                            ("24",'<24 hrs'),
-                            ("48",'<48 hrs'),
-                            ("72",'<72 hrs'),
-                            ("168",'<1 week'),
-                            ("336",'>1 week')
+  <!-- These variables should probably be defined in a separate template that extends this one -->
+  {% set conv_map_tuples = [(6,'<6 hrs'),
+                            (12,'<12 hrs'),
+                            (24,'<24 hrs'),
+                            (48,'<48 hrs'),
+                            (72,'<72 hrs'),
+                            (168,'<1 week'),
+                            (336,'>1 week')
                             ]
   %}
   
   {% set convenience_map = dict(conv_map_tuples) %}
   
   <h3>Connections</h3>
+    <form id="confirmed_connections" name="confirmed_connections" method="post" action="{{ url_for('_modify_connections') }}">
+        <input type="submit" name="btn" value="Modify Connections">
         <table class="scroll">
-    <thead>
-        <tr>
-            <th>Agent</th>
-            <th>Convenience</th>
-            <th>Disconnect</th>
-        </tr>
-    </thead>
-    <tbody class="scroll">
-    {% for agent, path in verified_neighbors %}
-      <tr>
-        <td> {{ agent.agent_name }} </td>
-        <td> {{ convenience_map[path.cost] }} </td>
-        
-        <td>
-        <input type="checkbox" class="sugg" name="{{ agent.groupme_id }}" value="{{ agent.groupme_id }}">
-        </td>
-      </tr>
-    {% else %}
-      You currently are not connected to any other agents. Register connections
-      to agents you can easily meet with for gear exchange suggestions.
-    {% endfor %}
-    </tbody>
-    </table>
+            <thead>
+                <tr>
+                    <th>Agent</th>
+                    <th>Current Convenience</th>
+                    <th>Modify Convenience</th>
+                    <th>Disconnect</th>
+                    <th>Block</th>
+                </tr>
+            </thead>
+            <tbody class="scroll">
+            {% for agent, path in verified_neighbors %}
+              <tr>
+                <td> {{ agent.agent_name }} </td>
+                <td> {{ convenience_map[path.cost] }} </td>
+                
+                <td>
+                  <select name="mod_{{ agent.groupme_id }}">
+                    <option value></option>
+                    {% for val,descr in conv_map_tuples %}
+                      <option value={{val}}>{{descr}}</option>
+                    {% endfor %}
+                  </select>
+                </td>
+                
+                <td>
+                <input type="checkbox" class="disconnect_chk" name="disconn_{{ agent.groupme_id }}" disabled="disabled">
+                </td>
+                <td>
+                <input type="checkbox" class="block_chk" name="block_{{ agent.groupme_id }}">
+                </td>
+              </tr>
+            {% else %}
+              You currently are not connected to any other agents. Register connections
+              to agents you can easily meet with for gear exchange suggestions.
+            {% endfor %}
+            </tbody>
+        </table>
+    </form>
   
+  <!-- This should probably be a separate template -->
   <h3>Suggested Connections</h3>
   
     Please indicate agents for whom it would not be a significant inconvenience
@@ -67,14 +86,14 @@
         </tr>
     </thead>
     <tbody class="scroll">
-    <input type="submit" value="Submit New Connections">
+    <input type="submit" name="btn" value="Submit New Connections">
     {% for suggestion in suggestions %}
         <tr>
             <td>
-              <select id="new_agent_id" class="sugg" name="{{ suggestion.id }}">
+              <select class="sugg" name="{{ suggestion.id }}">
                 <option value></option>
                 {% for val,descr in conv_map_tuples %}
-                    <option value="{{val}}">{{descr}}</option>
+                    <option value={{val}}>{{descr}}</option>
                 {% endfor %}
               </select>
             </td>

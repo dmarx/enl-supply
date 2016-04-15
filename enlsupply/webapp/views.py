@@ -153,7 +153,11 @@ def _submit_new_connections():
     !met verification) was unsuccessful.
     """
     print "Message recieved"
-    
+    print request.form['btn']
+    if request.form['btn'] != 'Submit New Connections':
+        print "Wrong button, returning early"
+        return redirect(url_for('connections'))
+    print "right button, continuing."
     access_token = request.args.get('access_token')
     gm = GroupmeUser(access_token)
     user = User(session['groupme_id'])
@@ -162,7 +166,11 @@ def _submit_new_connections():
         # This is a pretty big POST request. Unused form options still get submitted.
         # Is there a simple way to only submit populated form items? Or will I need
         # to write some jquery? :p
+        if id == 'btn':
+            continue
         if est_hours:
+            print "k,v:", id, est_hours
+            print type(est_hours), est_hours
             est_hours = int(est_hours)
             #print id, est_hours
             verified = []
@@ -179,7 +187,40 @@ def _submit_new_connections():
                 io_verif_fail.append(id)
     return redirect(url_for('connections'))
     
+@app.route('/_modify_connections', methods=['POST','GET'])
+def _modify_connections():
+    print "Modifications recieved"
+    print request.form['btn']
+    if request.form['btn'] != 'Modify Connections':
+        return redirect(url_for('connections'))
+    access_token = request.args.get('access_token')
+    gm = GroupmeUser(access_token)
+    user = User(session['groupme_id'])
     
+    for k, v in request.form.iteritems():
+        if k == 'btn' or not v:
+            continue
+        action, id = k.split('_')
+        print action, id, v
+        
+        if action == 'mod': # Modify cost of an existing connection
+            # This function probably shouldn't be attached to the class like this.
+            user.set_user_relationship(source=user.node, target=User(id).node,
+                                       cost=int(v),
+                                       verified=True, 
+                                       override=True)
+                                       
+            ### If reverse relationship is unverified, this modification action
+            ### should update the cost on the unverified relationship as well.
+        
+        if action == 'disconn': # Disconnect from node. Should only be available if no other/inbound verified relationships to node
+            pass
+            
+        if action == 'block': # Disconnect and block all routes through node. Register an alarm of some kind.
+            pass
+        
+    
+    return redirect(url_for('connections'))
     
 @app.route('/logout')
 def logout():
