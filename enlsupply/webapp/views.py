@@ -148,7 +148,7 @@ def _groupme_callback():
         flash('Logged in.')
         return redirect(url_for('index'))
     
-@app.route('/_submit_new_connections', methods=['POST'])
+@app.route('/_submit_new_connections', methods=['POST','GET'])
 def _submit_new_connections():
     """
     Receives groupme_ids from connections.html AJAX call. Runs agent 
