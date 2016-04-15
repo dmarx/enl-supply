@@ -148,7 +148,7 @@ def _groupme_callback():
         flash('Logged in.')
         return redirect(url_for('index'))
     
-@app.route('/_submit_new_connections')
+@app.route('/_submit_new_connections', methods=['POST'])
 def _submit_new_connections():
     """
     Receives groupme_ids from connections.html AJAX call. Runs agent 
@@ -158,26 +158,35 @@ def _submit_new_connections():
     !met verification) was unsuccessful.
     """
     print "Message recieved"
-    user_ids = request.args.get('groupme_ids').split(',')
+    
     access_token = request.args.get('access_token')
+    #access_token2 = session['access_token']
+    #print "token1", access_token 
+    #print "token2", access_token2 
     gm = GroupmeUser(access_token)
     user = User(session['groupme_id'])
-    verified = []
-    io_verif_fail = []
-    print user_ids
-    print type(user_ids)
-    print(len(user_ids))
-    for id in user_ids:
-        agent = verify_agent(id=id, token=app_token, service='groupme')
-        if agent:
-            print "Adding link {src} -> {tgt}".format(src=user.agent_name, tgt=agent)
-            user.add_verified_relationship(groupme_id=id, agent_name=agent, cost=1)
-        else:
-            io_verif_fail.append(id)
-    #return redirect(url_for('connections')) 
-    #print "Returning response"
-    return jsonify(result=None)
-    # This endpoint is looking for AJAX/json data, so the redirect doesn't do anything.
+    
+    for id, est_hours in request.form.iteritems():
+        # This is a pretty big POST request. Unused form options still get submitted.
+        # Is there a simple way to only submit populated form items? Or will I need
+        # to write some jquery? :p
+        if est_hours:
+            print id, est_hours
+            verified = []
+            io_verif_fail = []
+
+            agent = verify_agent(id=id, token=app_token, service='groupme')
+            if agent:
+                print "Adding link {src} -> {tgt}".format(src=user.agent_name, tgt=agent)
+                user.add_verified_relationship(groupme_id=id, 
+                                               agent_name=agent, 
+                                               cost=est_hours, 
+                                               default_cost=est_hours) # why not
+            else:
+                io_verif_fail.append(id)
+    return redirect(url_for('connections'))
+    
+    
     
 @app.route('/logout')
 def logout():

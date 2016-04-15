@@ -14,5 +14,6 @@ secret_key = config.get('app','secret_key')
 #app.config['SERVER_NAME'] = 'enl.supply'
 app.secret_key = secret_key
 port = int(os.environ.get('PORT', 5000))
-#app.debug = True
-#app.run(host='0.0.0.0', port=port)
+if os.name != 'posix': # Assume this means we're not running on the server.
+    app.debug = True
+    app.run(host='0.0.0.0', port=port)
