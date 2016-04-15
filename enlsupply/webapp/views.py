@@ -171,7 +171,8 @@ def _submit_new_connections():
         # Is there a simple way to only submit populated form items? Or will I need
         # to write some jquery? :p
         if est_hours:
-            print id, est_hours
+            est_hours = int(est_hours)
+            #print id, est_hours
             verified = []
             io_verif_fail = []
 
