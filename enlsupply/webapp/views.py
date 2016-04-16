@@ -205,10 +205,11 @@ def _modify_connections():
         
         if action == 'mod': # Modify cost of an existing connection
             # This function probably shouldn't be attached to the class like this.
-            user.set_user_relationship(source=user.node, target=User(id).node,
-                                       cost=int(v),
-                                       verified=True, 
-                                       override=True)
+            #user.set_user_relationship(source=user.node, target=User(id).node,
+            #                           cost=int(v),
+            #                           verified=True, 
+            #                           override=True)
+            user.modify_verified_relationship(groupme_id=id, cost=int(v))
                                        
             ### If reverse relationship is unverified, this modification action
             ### should update the cost on the unverified relationship as well.

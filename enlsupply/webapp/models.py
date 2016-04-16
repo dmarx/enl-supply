@@ -117,7 +117,14 @@ class User(SimpleNode):
         else:
             rel = Relationship(source, "CAN_REACH", target, cost=cost, verified=verified)
             graph.create_unique(rel) # Do I need to enforce a uniqueness constraint on relationships?
+    def modify_verified_relationship(self, groupme_id, cost):
+        source = self.node
+        target = graph.merge_one("User", "groupme_id", groupme_id)
+        self.set_user_relationship(source=source, target=target, cost=cost, verified=True, override=True)
         
+        rel = graph.match_one(target, "CAN_REACH", source)
+        if not rel['verified']:
+            self.set_user_relationship(source=target, target=source, cost=cost, verified=rel['verified'], override=True)
     def add_verified_relationship(self, groupme_id, agent_name=None, cost=None, default_cost=3):
         """
         Creates a relationship to the target user with a given cost and sets it as 
