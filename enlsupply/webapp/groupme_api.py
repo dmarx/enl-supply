@@ -1,5 +1,10 @@
 import requests
-from collections import defaultdict
+from collections import defaultdict 
+import time # for dm guid
+try:
+    import ujson as json
+except:
+    import json
 
 class GroupmeUser(object):
     jarvis_id = '15678427'
@@ -76,7 +81,32 @@ class GroupmeUser(object):
                  'id':id
                  } for id, groups in sugg 
                  if id not in (self.jarvis_id,self.id)]
-            
+    
+    def direct_message(self, 
+                        groupme_id, 
+                        text="Hello!"
+                        ):
+        api_url = 'https://api.groupme.com/v3'
+        endpoint = '/direct_messages'
+        url = api_url+endpoint
+        
+        access_token = self.user_token
+        guid = str(time.time()) + 'enl.supply_message'
+
+        payload = json.dumps(
+                    {'direct_message':
+                        {'source_guid':guid,
+                        'recipient_id':str(groupme_id),
+                        'text':text
+                        }
+                    })
+
+        response = requests.post(url, 
+                                 params={'token':access_token}, 
+                                 data=payload,
+                                 headers={'content-type': 'application/json'})
+        return response
+
 if __name__ == '__main__':
     demo_token = None
     app_token = None
