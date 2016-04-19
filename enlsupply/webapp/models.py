@@ -121,6 +121,22 @@ class User(SimpleNode):
         if rel['verified']:
             rel['verified'] = False
             graph.push(rel)
+            
+    def unblock(self, groupme_id=None, agent_name=None):
+        # The code to bind the target node should probably be factored out to DRY out the class some
+        assert(groupme_id or agent_name)
+        source = self.node
+        if groupme_id:
+            target = graph.merge_one("User", "groupme_id", groupme_id)
+        else:
+            target = graph.merge_one("User", "agent_name", agent_name)
+        #block = Relationship(source, "BLOCK", target)
+        block = graph.match(source, "BLOCK", target)
+        block_l = list(block)
+        if len(block_l)>0:
+            # There should only ever be one, but we can loop anyway just to be safe.
+            for block in block_l:
+                graph.delete(block)
         
     def set_user_relationship(self, target, source=None, cost=3, verified=True, override=False):
         if not source:
