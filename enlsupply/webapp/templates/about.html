@@ -5,43 +5,60 @@
 
     <h2>FAQ</h2>
 
+    <br><br>
     <h3>What is enl.supply?</h3>
 
     enl.supply is a logistical operations tool for matching agents with a surplus of inventory with agents who need inventory. Our goal is to maximize the efficiency of our team's item usage and farming capabilities.
 
+    <br><br>
     <h3>How does it work?</h3>
 
     Users specify agents they are connected to form a kind of "social network" like facebook, where a connection represents the ability to meet that person to exchange gear without a significant imposition. Then, users tell the application what gear they have or need. The application then suggests exchanges or sequences of exchanges that connect users that need gear with agents that can satisfy that demand.
 
+    <br><br>
     <h3>Who can I connect with?</h3>
 
     You can connect with anyone who is in an enl.io-managed GroupMe group that you are also in. 
 
+    <br><br>
     <h3>How are exchanges coordinated?</h3>
 
-    At present, it's up to the agents involved to coordinate exchanges. The application only tells you how to get the gear you need, it won't facilitate the exchange beyond that. In the future, we hope the application will be able to more actively facilitate exchanges.
+    At present, it's up to the agents involved to coordinate exchanges. The 
+    application will tell you how to get the gear you need and help you contact 
+    agents you have "connected" with, but it won't facilitate the exchange beyond that. 
+    In the future, we hope the application will be able to more actively facilitate exchanges.
 
+    <br><br>
     <h3>How are suggestions for agents to connect to determined?</h3>
 
     The application looks at people in your GroupMe groups, constraining attention to groups that are managed by enl.io, and ranks suggestions by how many groups you share with each person.
 
+    <br><br>
     <h3>Can I use enl.supply for my community?</h3>
 
     Currently, enl.supply is in a closed testing period constrained to a handful of eastern seaboard communities.
 
+    <br><br>
     <h3>What makes enl.supply secure?</h3>
 
     Mainly, enl.io. 
     To use the service, you must first login with GroupMe. After this step is successful, enl.io confirms that your GroupMe id is associated with an authorized ENL agent. This grants you access to the system. When you try to connect with people on the Connections page, any person that hasn’t previously used enl.supply has their GroupMe id checked against enl.io. This ensures that we only even suggest paths including agents who are confirmed in enl.io.
     Additionally, suggested paths are limited to two "hops", so you may be able to see the inventory of your direct connections and their friends, but that's as deep into the network as any individual agent can see. This is essentially serves as a weak form of intel compartmentalization.
     
+    <br><br>
     <h3>Can I donate?</h3>
 
     Money? Not at the moment, no. But if you are a decent developer and want to help with the (admittedly ugly) site design, I would love it if you could donate some time! I should probably add some kind of contact method here, huh?
 
+    <br><br>
     <h3>Who made this?</h3>
 
     Agent scratchscratch, DMV Enlightened.
+    
+    <br><br>
+    <h3>I have an idea for how this could be improved</h3>
+    
+    You can provide feedback <a href="https://docs.google.com/forms/d/1AH5Ahvi1N0MZGRefJTOvg4t9CXIxo_hmNaZM79xNdWw/viewform">here</a>.
 
   {% else %}
     {% include "login.html" %}
