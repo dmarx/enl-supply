@@ -203,6 +203,27 @@ class User(SimpleNode):
         # Not sure COUNT(*) is doing what I think it is, need to test more
         return graph.cypher.execute(query, {self.pk_name:self.pk, 'k':limit})
         
+    def is_neighbor(self, agent_name=None, groupme_id=None):
+        if agent_name:
+            return self._is_neighbor_agentname(agent_name)
+        if groupme_id:
+            return self._is_neighbor_groupme(groupme_id)
+    
+    def _is_neighbor_agentname(self, agent_name):
+        query="""
+        OPTIONAL MATCH (a)-[r:CAN_REACH]-(b)
+        WHERE a.agent_name = {src_name}
+        AND   b.agent_name = {tgt_name}
+        RETURN r IS NOT NULL AS is_neighbor
+        """
+        return graph.cypher.execute(query, 
+            {'src_name':self.agent_name, 'tgt_name':agent_name}
+            )[0].is_neighbor
+    
+    def _is_neighbor_groupme(self, groupme_id):
+        pass
+        
+        
     def communities(self):
         query = """
         MATCH (user:User)-[r:IS_MEMBER_OF]->(b:Community)
