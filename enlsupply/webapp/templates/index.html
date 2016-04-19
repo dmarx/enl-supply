@@ -7,20 +7,23 @@
     </div>
     <h2>Welcome!</h2>
     
-    ENL.Supply is a tool for connecting agents who have a surplus of inventory 
+    ENL.supply is a tool for connecting agents who have a surplus of inventory 
     with agents looking for those items. 
-    <br>
-    <br>
-    <h3><a href="{{ url_for('update_inventory') }}";>Manage Inventory</a></h3>
-      <ul>Specify your inventory demands or excess supply.</ul>
+    <br><br>
+
+    <h3><a href="{{ url_for('update_inventory') }}">Manage Inventory</a></h3>
+      Specify your inventory demands or excess supply.
+      <br><br>
     <h3><a href="{{ url_for('connections') }}">Manage Connections</a></h3>
-      <ul>Connect to agents (in your GroupMe groups) so we can link you to trade gear.</ul>
+      Connect to agents (in your GroupMe groups) so we can link you to trade gear.</ul>
+      <br><br>
     <h3><a href="{{ url_for('supply_me') }}">Supply Me</a></h3>
-      <ul>You've listed what you need: here's how you get it!</ul>
+      You've listed what you need: here's how you get it!
+      <br><br>
     <h3><a href="{{ url_for('unload_me') }}">Unload Me</a></h3>
-      <ul>At cap? Don't recycle that gear, these agents need it!</ul>
-    </ul>
-    
+      At cap? Don't recycle that gear, these agents need it!
+      <br><br>
+    <h3><a href="{{ url_for('about') }}">About</a></h3>
   {% else %}
     {% include "login.html" %}
   {% endif %}

@@ -9,10 +9,10 @@
       $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
     </script>
 </head>
-<title>ENL Supply Chain</title>
+<title>ENL.supply</title>
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
 <div class="page">
-  <h1><a href="{{ url_for('index') }}";>ENL Supply Chain</a></h1>
+  <h1><a href="{{ url_for('index') }}";>ENL.supply</a></h1>
   <div class="metanav">
   {% if session.username %}
     Logged in as {{ session.username }}
