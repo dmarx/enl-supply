@@ -32,7 +32,7 @@
             <tbody class="scroll">
             {% for agent, path in verified_neighbors %}
               <tr>
-                <td> {{ agent.agent_name }} </td>
+                <td> <a href="{{ url_for('profile', agent_name=agent.agent_name) }}">{{ agent.agent_name }}</a> </td>
                 <td> {{ convenience_map[path.cost] }} </td>
                 
                 <td>
