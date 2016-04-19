@@ -34,7 +34,19 @@
       <td>
         <table>
           {% for path in rec.path%}
-            <tr><td>{{ path | map(attribute='agent_name') | join(' --> ') }}</td></tr>
+            
+            <tr><td>
+            {% for step in path[:-1] %}
+              <a href="{{ url_for('profile', agent_name=step.agent_name) }}">
+                {{ step.agent_name }}
+              </a>
+              -->
+            {% endfor %}
+              <a href="{{ url_for('profile', agent_name=path[-1].agent_name) }}">
+                {{ path[-1].agent_name }}
+              </a>
+            </td></tr>
+            
           {% endfor %}
         </table>
       </td>
