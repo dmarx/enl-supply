@@ -123,18 +123,19 @@ class User(SimpleNode):
             graph.delete(rel_out)
             graph.delete(rel_in)
         
-    def block(self, groupme_id=None, agent_name=None):
+    def block(self, groupme_id=None, agent_name=None, target=None):
         """
         Unverify outgoing CAN_REACH relationship and prevent any exchange 
         suggestions that include this edge in the path.
         """
-        assert(groupme_id or agent_name)
         source = self.node
-        if groupme_id:
-            target = graph.merge_one("User", "groupme_id", groupme_id)
-        else:
-            target = graph.merge_one("User", "agent_name", agent_name)
-        
+        if not target:
+            assert(groupme_id or agent_name)
+            if groupme_id:
+                target = graph.merge_one("User", "groupme_id", groupme_id)
+            else:
+                target = graph.merge_one("User", "agent_name", agent_name)
+            
         # 1. Create block relationship
         block = Relationship(source, "BLOCK", target)
         graph.create_unique(block) # Do I need to enforce a uniqueness constraint on relationships?
@@ -149,16 +150,17 @@ class User(SimpleNode):
         if self.is_neighbor(agent_name=target['agent_name']): 
             self.disconnect(target=target)
             
-    def unblock(self, groupme_id=None, agent_name=None):
+    def unblock(self, groupme_id=None, agent_name=None, target=None):
         # The code to bind the target node should probably be factored out to DRY out the class some
         # ... I shold just use the pk/pk_name idiom I use for the rest of the class.
-        assert(groupme_id or agent_name)
         source = self.node
-        if groupme_id:
-            target = graph.merge_one("User", "groupme_id", groupme_id)
-        else:
-            target = graph.merge_one("User", "agent_name", agent_name)
-        #block = Relationship(source, "BLOCK", target)
+        if not target:
+            assert(groupme_id or agent_name)
+            if groupme_id:
+                target = graph.merge_one("User", "groupme_id", groupme_id)
+            else:
+                target = graph.merge_one("User", "agent_name", agent_name)
+                
         block = graph.match(source, "BLOCK", target)
         block_l = list(block)
         if len(block_l)>0:
@@ -211,6 +213,7 @@ class User(SimpleNode):
             graph.push(neighbor)
         self.set_user_relationship(source=self.node, target=neighbor, cost=cost, verified=True, override=True)
         self.set_user_relationship(source=neighbor, target=self.node, cost=default_cost, verified=False, override=False)
+        self.unblock(target=neighbor)
         
     def add_community_membership(self, community):
         comm = graph.merge_one("Community", "name", community)   
