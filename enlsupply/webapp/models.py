@@ -100,6 +100,28 @@ class User(SimpleNode):
         self.node['active'] = False
         graph.push(self._node)
         
+    def block(self, groupme_id=None, agent_name=None):
+        """
+        Unverify outgoing CAN_REACH relationship and prevent any exchange 
+        suggestions that include this edge in the path.
+        """
+        assert(groupme_id or agent_name)
+        source = self.node
+        if groupme_id:
+            target = graph.merge_one("User", "groupme_id", groupme_id)
+        else:
+            target = graph.merge_one("User", "agent_name", agent_name)
+        
+        # 1. Create block relationship
+        block = Relationship(source, "BLOCK", target)
+        graph.create_unique(block) # Do I need to enforce a uniqueness constraint on relationships?
+        
+        # 2. Set outgoing CAN_REACH to "verified=False" if the verified relationship already exists
+        rel = graph.match_one(source, "CAN_REACH", target)
+        if rel['verified']:
+            rel['verified'] = False
+            graph.push(rel)
+        
     def set_user_relationship(self, target, source=None, cost=3, verified=True, override=False):
         if not source:
             source=self.node
@@ -117,6 +139,7 @@ class User(SimpleNode):
         else:
             rel = Relationship(source, "CAN_REACH", target, cost=cost, verified=verified)
             graph.create_unique(rel) # Do I need to enforce a uniqueness constraint on relationships?
+            
     def modify_verified_relationship(self, groupme_id, cost):
         source = self.node
         target = graph.merge_one("User", "groupme_id", groupme_id)
@@ -125,6 +148,7 @@ class User(SimpleNode):
         rel = graph.match_one(target, "CAN_REACH", source)
         if not rel['verified']:
             self.set_user_relationship(source=target, target=source, cost=cost, verified=rel['verified'], override=True)
+            
     def add_verified_relationship(self, groupme_id, agent_name=None, cost=None, default_cost=3):
         """
         Creates a relationship to the target user with a given cost and sets it as 
