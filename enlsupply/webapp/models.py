@@ -100,6 +100,29 @@ class User(SimpleNode):
         self.node['active'] = False
         graph.push(self._node)
         
+    def disconnect(self, groupme_id=None, agent_name=None, target=None):
+        if not target:
+            assert(groupme_id or agent_name)
+            source = self.node
+            if groupme_id:
+                target = graph.merge_one("User", "groupme_id", groupme_id)
+            else:
+                target = graph.merge_one("User", "agent_name", agent_name)
+            
+        rel_out = graph.match(source, "CAN_REACH", target).next()
+        rel_in  = graph.match(target, "CAN_REACH", source).next()
+        
+        # If rel_in is verified, unverify rel_out and enforce cost parity.
+        # If rel_in is not verified, delete both relationships.
+        
+        if rel_in['verified']:
+            rel_out['verified'] = False
+            rel_out['cost'] = rel_in['cost']
+            graph.push(rel_out)
+        else:
+            graph.delete(rel_out)
+            graph.delete(rel_in)
+        
     def block(self, groupme_id=None, agent_name=None):
         """
         Unverify outgoing CAN_REACH relationship and prevent any exchange 
@@ -117,13 +140,18 @@ class User(SimpleNode):
         graph.create_unique(block) # Do I need to enforce a uniqueness constraint on relationships?
         
         # 2. Set outgoing CAN_REACH to "verified=False" if the verified relationship already exists
-        rel = graph.match_one(source, "CAN_REACH", target)
-        if rel['verified']:
-            rel['verified'] = False
-            graph.push(rel)
+        #rel = graph.match_one(source, "CAN_REACH", target)
+        #if rel['verified']:
+        #    rel['verified'] = False
+        #    graph.push(rel)
+        
+        # This is a sort of redundant database request. Can probably be factored out.
+        if self.is_neighbor(agent_name=agent_name): 
+            self.disconnect(target=target)
             
     def unblock(self, groupme_id=None, agent_name=None):
         # The code to bind the target node should probably be factored out to DRY out the class some
+        # ... I shold just use the pk/pk_name idiom I use for the rest of the class.
         assert(groupme_id or agent_name)
         source = self.node
         if groupme_id:
@@ -261,6 +289,7 @@ class User(SimpleNode):
             )[0].is_neighbor
     
     def _is_neighbor_groupme(self, groupme_id):
+        raise Exception('User._is_neighbor_groupme not Implemented')
         pass
         
         
