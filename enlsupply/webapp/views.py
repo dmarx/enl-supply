@@ -1,4 +1,4 @@
-from models import User, Inventory, ConnectionSuggesterGM
+from models import User, Inventory, ConnectionSuggesterGM, graph
 from flask import Flask, request, session, redirect, render_template, \
                   flash, jsonify
 from flask import url_for as base_url_for # to override
@@ -242,3 +242,56 @@ def add_inventory():
         User(session['groupme_id']).inventory.set(type=type, level=level, value=value)
 
     return redirect(url_for('update_inventory'))
+
+@app.route('/profile/<agent_name>')
+def profile(agent_name):
+    logged_in_username = session.get('username')
+    
+    # If logged-in user wants to contact profile user through the app, we need
+    # to verify that the two users either share a groupme group, or have already 
+    # talked to each other.
+    #
+    # ... as a simple workaround, only allow the app to facilitate communication
+    # between neighbors. Probably worth it to add a User.is_neighbor method so
+    # we don't need to pull all neighbors into the webapp to test in python.
+    
+    if logged_in_username:
+        is_neighbor = User(session['groupme_id']).is_neighbor(agent_name)
+        print agent_name, "is neighbor:", is_neighbor
+        return render_template('profile.html', 
+            agent_name=agent_name,
+            is_neighbor=is_neighbor,
+            )
+    else:
+        return redirect(url_for('index'))    
+    
+@app.route('/_send_groupme_dm/<agent_name>', methods=['POST'])
+def _send_groupme_dm(agent_name):
+    text = request.form['text']
+    if text:
+        # Should make it possible to instantiate a User object from an agent_name
+        query = """
+        MATCH (a:User)
+        WHERE a.agent_name = {agent_name}
+        RETURN a.groupme_id
+        """
+        groupme_id = graph.find_one("User", "agent_name", agent_name)['groupme_id']
+        
+        access_token = session['groupme_token']
+        gm = GroupmeUser(access_token)
+        response = gm.direct_message(groupme_id, text)
+        
+        if response.status_code == 201:
+            flash('Message sent')
+        elif response.status_code == 403:
+            flash('User has been auto-banned for sending too many messages.')
+        elif response.status_code == 400:
+            flash('The application encountered a problem sending your message. Contact the site administrator')
+        else:
+            flash('Something unexpected happened. Contact the site administrator with the following information:')
+            flash(response.json())
+        
+    else:
+        flash('Enter text to send a message.')
+        
+    return redirect(url_for('profile', agent_name=agent_name))
