@@ -215,10 +215,10 @@ def _modify_connections():
             ### should update the cost on the unverified relationship as well.
         
         if action == 'disconn': # Disconnect from node. Should only be available if no other/inbound verified relationships to node
-            pass
+            user.disconnect(groupme_id=id)
             
         if action == 'block': # Disconnect and block all routes through node. Register an alarm of some kind.
-            pass
+            user.block(groupme_id=id)
         
     
     return redirect(url_for('connections'))

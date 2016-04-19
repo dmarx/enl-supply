@@ -101,9 +101,9 @@ class User(SimpleNode):
         graph.push(self._node)
         
     def disconnect(self, groupme_id=None, agent_name=None, target=None):
+        source = self.node
         if not target:
             assert(groupme_id or agent_name)
-            source = self.node
             if groupme_id:
                 target = graph.merge_one("User", "groupme_id", groupme_id)
             else:
@@ -146,7 +146,7 @@ class User(SimpleNode):
         #    graph.push(rel)
         
         # This is a sort of redundant database request. Can probably be factored out.
-        if self.is_neighbor(agent_name=agent_name): 
+        if self.is_neighbor(agent_name=target['agent_name']): 
             self.disconnect(target=target)
             
     def unblock(self, groupme_id=None, agent_name=None):
