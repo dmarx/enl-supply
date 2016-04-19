@@ -5,9 +5,6 @@
   
   
     <h2>{{ agent_name }}'s profile</h2>
-    {% if session.username == agent_name %}
-        This is your profile.
-    {% endif %}
   
     {% if is_neighbor %}
       <h3>Contact on GroupMe</h3>
@@ -23,6 +20,8 @@
         </dl>
         <input type="submit" value="Submit">
       </form>
+    {% elif session.username == agent_name  %}
+      This is your profile.
     {% else %}
       <h3>Contact on GroupMe</h3>
       Sorry, we can't help you here.<br><br>
