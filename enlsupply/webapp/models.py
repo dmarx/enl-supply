@@ -122,6 +122,8 @@ class User(SimpleNode):
         else:
             graph.delete(rel_out)
             graph.delete(rel_in)
+            agg_rel = graph.match_one(source, "IS_CONNECTED", target)
+            graph.delete(agg_rel)
         
     def block(self, groupme_id=None, agent_name=None, target=None):
         """
@@ -150,6 +152,12 @@ class User(SimpleNode):
         if self.is_neighbor(agent_name=target['agent_name']): 
             self.disconnect(target=target)
             
+        a,b = block.nodes
+        if a.agent_name < b.agent_name:
+            self.update_aggregate_path(target, block1=block)
+        else:
+            self.update_aggregate_path(target, block2=block)
+            
     def unblock(self, groupme_id=None, agent_name=None, target=None):
         # The code to bind the target node should probably be factored out to DRY out the class some
         # ... I shold just use the pk/pk_name idiom I use for the rest of the class.
@@ -168,6 +176,8 @@ class User(SimpleNode):
             for block in block_l:
                 graph.delete(block)
         
+        self.update_aggregate_path(target) # We only need to update the blocked attribute, not the cost or verified.
+        
     def set_user_relationship(self, target, source=None, cost=3, verified=True, override=False):
         if not source:
             source=self.node
@@ -185,15 +195,18 @@ class User(SimpleNode):
         else:
             rel = Relationship(source, "CAN_REACH", target, cost=cost, verified=verified)
             graph.create_unique(rel) # Do I need to enforce a uniqueness constraint on relationships?
+        return rel
             
     def modify_verified_relationship(self, groupme_id, cost):
         source = self.node
         target = graph.merge_one("User", "groupme_id", groupme_id)
-        self.set_user_relationship(source=source, target=target, cost=cost, verified=True, override=True)
+        rel1 = self.set_user_relationship(source=source, target=target, cost=cost, verified=True, override=True)
         
-        rel = graph.match_one(target, "CAN_REACH", source)
-        if not rel['verified']:
-            self.set_user_relationship(source=target, target=source, cost=cost, verified=rel['verified'], override=True)
+        rel2 = graph.match_one(target, "CAN_REACH", source)
+        if not rel2['verified']:
+            rel2 = self.set_user_relationship(source=target, target=source, cost=cost, verified=rel2['verified'], override=True)
+            
+        self.update_aggregate_path(target, r1=rel1, r2=rel2)
             
     def add_verified_relationship(self, groupme_id, agent_name=None, cost=None, default_cost=3):
         """
@@ -211,9 +224,64 @@ class User(SimpleNode):
         if agent_name and not neighbor['agent_name']:
             neighbor['agent_name'] = agent_name
             graph.push(neighbor)
-        self.set_user_relationship(source=self.node, target=neighbor, cost=cost, verified=True, override=True)
-        self.set_user_relationship(source=neighbor, target=self.node, cost=default_cost, verified=False, override=False)
+        r1 =self.set_user_relationship(source=self.node, target=neighbor, cost=cost, verified=True, override=True)
+        r2 = self.set_user_relationship(source=neighbor, target=self.node, cost=default_cost, verified=False, override=False)
         self.unblock(target=neighbor)
+        
+        self.update_aggregate_path(target=neighbor, r1=r1, r2=r2)
+        
+    def update_aggregate_path(self, target, r1=None, r2=None, block1=None, block2=None):
+        """
+        If only one of r1/r2 provided, assumes r1: src.agent_name < tgt.agent_name 
+        and r2: src.agent_name > tgt.agent_name. Same if only one of block1/block2
+        provided.
+        """
+        # This function is probably overkill. For most cases, we can probably do a more targetted
+        # update, i.e. of either the cost, verified, or blocked parameter (depending on what was
+        # changed). Each graph.match_one call is another database request, so we can potentially
+        # speed up the app (and maybe make hosting cheaper) by reducing database i/o.
+        
+        # Add aggregate path
+        source = self.node
+        if source['agent_name'] >  target['agent_name']:
+            source, target = target, source
+        
+        if not r1:
+            r1 = graph.match_one(source, 'CAN_REACH', target)
+        if not r2:
+            r2 = graph.match_one(target, 'CAN_REACH', source)
+        
+        ######
+        
+        max_cost = max(r1['cost'], r2['cost'])
+        min_cost = min(r1['cost'], r2['cost'])
+        
+        block1 = graph.match(source, "BLOCK", target)
+        block2 = graph.match(target, "BLOCK", source)
+        is_blocked = len(list(block1)) + len(list(block2)) > 0
+        
+        verified = r1['verified'] and r2['verified']
+        
+        ######
+        
+        agg_rel = graph.match_one(source, "IS_CONNECTED", target)
+        print "AGGREL"
+        print type(agg_rel)
+        print agg_rel
+        #if list(agg_rel)>0:
+        if agg_rel:
+            agg_rel['max_cost'] = max_cost
+            agg_rel['min_cost'] = min_cost
+            agg_rel['blocked'] = is_blocked
+            agg_rel['double_verified'] = verified
+            graph.push(agg_rel)
+        else:
+            agg_rel = Relationship(source, "IS_CONNECTED", target, 
+                max_cost=max_cost, 
+                min_cost=min_cost,
+                blocked=is_blocked,
+                double_verified=verified)
+            graph.create_unique(agg_rel)
         
     def add_community_membership(self, community):
         comm = graph.merge_one("Community", "name", community)   
