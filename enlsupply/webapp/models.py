@@ -265,9 +265,6 @@ class User(SimpleNode):
         ######
         
         agg_rel = graph.match_one(source, "IS_CONNECTED", target)
-        print "AGGREL"
-        print type(agg_rel)
-        print agg_rel
         #if list(agg_rel)>0:
         if agg_rel:
             agg_rel['max_cost'] = max_cost
@@ -282,6 +279,8 @@ class User(SimpleNode):
                 blocked=is_blocked,
                 double_verified=verified)
             graph.create_unique(agg_rel)
+        print "AGGREL"
+        print agg_rel
         
     def add_community_membership(self, community):
         comm = graph.merge_one("Community", "name", community)   
@@ -375,31 +374,32 @@ class User(SimpleNode):
     def supply_paths(self, radius=2, direction='in'):
         """Paths that fulfill this user's inventory demands to within a given radius"""
         
-        # We need to find all paths between the current node and any given candidate
-        # target, and filter down to those with the shortest possible cost
-        s1={'in':'<', 'out':''}[direction]
-        s2={'in':'', 'out':'>'}[direction]
         s3={'in':'<', 'out':'>'}[direction]
+        
         query="""
-        MATCH (demand)<-[:HAS]-(a){s1}-[chain:CAN_REACH*1..{radius}]-{s2}(terminus)-[:HAS]-(supply) 
+        MATCH (demand)<-[:HAS]-(a)-[chain:IS_CONNECTED*1..{radius}]-(terminus)-[:HAS]-(supply) 
         where a.{pk_name}={{{pk_name}}}
         and supply.type = demand.type 
         and supply.level = demand.level
         and SIGN(demand.value) {s3} SIGN(supply.value) 
-        return terminus, COLLECT(DISTINCT supply) as inventory, min(reduce(tot=0, r in chain | tot + r.cost)) AS minCost
-        """.format(s1=s1, s2=s2, s3=s3, radius=radius, pk_name=self.pk_name)
+        and all(r in chain where r.blocked = FALSE)
+        return terminus, 
+               COLLECT(DISTINCT supply) as inventory, 
+               min(reduce(tot=0, r in chain | tot + r.max_cost)) AS minCost
+        """.format(s3=s3, radius=radius, pk_name=self.pk_name)
         print query, {self.pk_name:self.pk}
         min_path_cost = graph.cypher.execute(query, {self.pk_name:self.pk})
         
         query="""
-        MATCH (demand)<-[:HAS]-(a){s1}-[chain:CAN_REACH*1..{radius}]-{s2}(terminus)-[:HAS]-(supply) 
+        MATCH (demand)<-[:HAS]-(a)-[chain:IS_CONNECTED*1..{radius}]-(terminus)-[:HAS]-(supply) 
         where a.{pk_name}={{{pk_name}}}
         and supply.type = demand.type 
         and supply.level = demand.level
         and SIGN(demand.value) {s3} SIGN(supply.value)  
-        RETURN terminus, chain, reduce(tot=0, r in chain | tot + r.cost) as totCost
+        and all(r in chain where r.blocked = FALSE)
+        RETURN terminus, chain, reduce(tot=0, r in chain | tot + r.max_cost) as totCost
         ORDER BY totCost
-        """.format(s1=s1, s2=s2, s3=s3, radius=radius, pk_name=self.pk_name)
+        """.format(s3=s3, radius=radius, pk_name=self.pk_name)
         paths = graph.cypher.execute(query, {self.pk_name:self.pk})
         
         source_costs = dict((rec.terminus[self.pk_name], {'minCost':rec.minCost, 'inventory':rec.inventory}) for rec in min_path_cost)
