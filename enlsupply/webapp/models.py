@@ -421,16 +421,21 @@ class User(SimpleNode):
                 path_names =  []
                 for rel in rec.chain:
                     #path.extend(rel.nodes)
-                    if direction == 'in':
-                        q,p = rel.nodes
-                    else:
-                        p,q = rel.nodes
+                    #if direction == 'in':
+                    #    q,p = rel.nodes
+                    #else:
+                    #    p,q = rel.nodes
+                    p,q = rel.nodes
                     if not path:
                         path =[p,q]
                         path_names = [p.ref, q.ref]
                     else:
-                        path.append(q)
-                        path_names.append(q.ref)
+                        if p.ref not in path_names:
+                            g = p
+                        else:
+                            g = q
+                        path.append(g)
+                        path_names.append(g.ref)
                 path_names = tuple(path_names)
                 if not paths_seen.has_key(path_names):
                     paths.append(path)
