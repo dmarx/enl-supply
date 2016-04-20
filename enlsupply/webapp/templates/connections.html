@@ -17,6 +17,7 @@
   {% set convenience_map = dict(conv_map_tuples) %}
   
   <h3>Connections</h3>
+    {% if verified_neighbors %}
     <form id="confirmed_connections" name="confirmed_connections" method="post" action="{{ url_for('_modify_connections') }}">
         <input type="submit" name="btn" value="Modify Connections">
         <table class="scroll">
@@ -51,13 +52,14 @@
                 <input type="checkbox" class="block_chk" name="block_{{ agent.groupme_id }}">
                 </td>
               </tr>
-            {% else %}
-              You currently are not connected to any other agents. Register connections
-              to agents you can easily meet with for gear exchange suggestions.
             {% endfor %}
             </tbody>
         </table>
     </form>
+    {% else %}
+      You currently are not connected to any other agents. Register connections
+      to agents you can easily meet with for gear exchange suggestions.
+    {% endif %}
   
   <!-- This should probably be a separate template -->
   <h3>Suggested Connections</h3>
