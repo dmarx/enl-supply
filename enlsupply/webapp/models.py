@@ -378,38 +378,42 @@ class User(SimpleNode):
         and supply.level = demand.level
         and SIGN(demand.value) {s3} SIGN(supply.value) 
         and all(r in chain where r.blocked = FALSE)
-        return terminus, 
+        return terminus, chain,
                COLLECT(DISTINCT supply) as inventory, 
-               min(reduce(tot=0, r in chain | tot + r.max_cost)) AS minCost
+               //min(reduce(tot=0, r in chain | tot + r.max_cost)) AS minCost
+               min(reduce(tot=0, r in chain | tot + r.max_cost)) AS totCost
         """.format(s3=s3, radius=radius, pk_name=self.pk_name)
         print query, {self.pk_name:self.pk}
         min_path_cost = graph.cypher.execute(query, {self.pk_name:self.pk})
         
-        query="""
-        MATCH (demand)<-[:HAS]-(a)-[chain:IS_CONNECTED*1..{radius}]-(terminus)-[:HAS]-(supply) 
-        where a.{pk_name}={{{pk_name}}}
-        and supply.type = demand.type 
-        and supply.level = demand.level
-        and SIGN(demand.value) {s3} SIGN(supply.value)  
-        and all(r in chain where r.blocked = FALSE)
-        RETURN terminus, chain, reduce(tot=0, r in chain | tot + r.max_cost) as totCost
-        ORDER BY totCost
-        """.format(s3=s3, radius=radius, pk_name=self.pk_name)
-        paths = graph.cypher.execute(query, {self.pk_name:self.pk})
+        # query="""
+        # MATCH (demand)<-[:HAS]-(a)-[chain:IS_CONNECTED*1..{radius}]-(terminus)-[:HAS]-(supply) 
+        # where a.{pk_name}={{{pk_name}}}
+        # and supply.type = demand.type 
+        # and supply.level = demand.level
+        # and SIGN(demand.value) {s3} SIGN(supply.value)  
+        # and all(r in chain where r.blocked = FALSE)
+        # RETURN terminus, chain, reduce(tot=0, r in chain | tot + r.max_cost) as totCost
+        # ORDER BY totCost
+        # """.format(s3=s3, radius=radius, pk_name=self.pk_name)
+        # paths = graph.cypher.execute(query, {self.pk_name:self.pk})
         
-        source_costs = dict((rec.terminus[self.pk_name], {'minCost':rec.minCost, 'inventory':rec.inventory}) for rec in min_path_cost)
+        #source_costs = dict((rec.terminus[self.pk_name], {'minCost':rec.minCost, 'inventory':rec.inventory}) for rec in min_path_cost)
 
-        return self._filter_paths(paths, source_costs, direction)
+        #return self._filter_paths(paths, source_costs, direction)
+        return self._filter_paths(min_path_cost)
         
-    def _filter_paths(self, paths, source_costs, direction):
+    #def _filter_paths(self, paths, source_costs, direction):
+    def _filter_paths(self, paths):
         """ filter paths down to paths with the least weight between two nodes in the event
         that several paths with the same source and target are returned.
         """
         best_paths = defaultdict(list)
+        #for rec in paths:
+            # if rec.totCost == source_costs[rec.terminus[self.pk_name]]['minCost']:
+                # best_paths[rec.terminus].append(rec)
         for rec in paths:
-            if rec.totCost == source_costs[rec.terminus[self.pk_name]]['minCost']:
-                best_paths[rec.terminus].append(rec)
-
+            best_paths[rec.terminus].append(rec)
         
         # Expand the 'chain'
         supply_chains = []
@@ -440,11 +444,11 @@ class User(SimpleNode):
                 if not paths_seen.has_key(path_names):
                     paths.append(path)
                     paths_seen[path_names] = 1
-            #paths = set(tuple(x) for x in paths) # Doesn't work. Should do this on the database
-            #paths = dedupe(paths)
-            supply_chains.append({'path':paths, 'inventory':source_costs[terminus[self.pk_name]]['inventory'], 
+            
+            #supply_chains.append({'path':paths, 'inventory':source_costs[terminus[self.pk_name]]['inventory'], 
+            #                      'terminus':terminus, 'cost':rec.totCost})
+            supply_chains.append({'path':paths, 'inventory':rec.inventory, 
                                   'terminus':terminus, 'cost':rec.totCost})
-        
         return supply_chains, best_paths
         
 #I'm pretty sure there's a better way I could implement this on the python side.
