@@ -111,6 +111,8 @@ class User(SimpleNode):
             
         rel_out = graph.match(source, "CAN_REACH", target).next()
         rel_in  = graph.match(target, "CAN_REACH", source).next()
+        #rel_out = graph.match_one(source, "CAN_REACH", target)
+        #rel_in  = graph.match_one(target, "CAN_REACH", source)
         
         # If rel_in is verified, unverify rel_out and enforce cost parity.
         # If rel_in is not verified, delete both relationships.
@@ -143,17 +145,18 @@ class User(SimpleNode):
         graph.create_unique(block) # Do I need to enforce a uniqueness constraint on relationships?
         
         # 2. Set outgoing CAN_REACH to "verified=False" if the verified relationship already exists
-        #rel = graph.match_one(source, "CAN_REACH", target)
-        #if rel['verified']:
-        #    rel['verified'] = False
-        #    graph.push(rel)
+        rel = graph.match_one(source, "CAN_REACH", target)
+        if rel['verified']:
+            rel['verified'] = False
+            graph.push(rel)
         
         # This is a sort of redundant database request. Can probably be factored out.
-        if self.is_neighbor(agent_name=target['agent_name']): 
-            self.disconnect(target=target)
+        #if self.is_neighbor(agent_name=target['agent_name']): 
+        #    self.disconnect(target=target)
+        self.disconnect(target=target)
             
         a,b = block.nodes
-        if a.agent_name < b.agent_name:
+        if a['agent_name'] < b['agent_name']:
             self.update_aggregate_path(target, block1=block)
         else:
             self.update_aggregate_path(target, block2=block)
@@ -246,39 +249,31 @@ class User(SimpleNode):
         if source['agent_name'] >  target['agent_name']:
             source, target = target, source
         
+        create=False
+        agg_rel = graph.match_one(source, "IS_CONNECTED", target)
+        if not agg_rel:
+            create = True
+            agg_rel = Relationship(source, "IS_CONNECTED", target)
+        
+        block1 = graph.match(source, "BLOCK", target)
+        block2 = graph.match(target, "BLOCK", source)
+        agg_rel['blocked'] = len(list(block1)) + len(list(block2)) > 0
+        
         if not r1:
             r1 = graph.match_one(source, 'CAN_REACH', target)
         if not r2:
             r2 = graph.match_one(target, 'CAN_REACH', source)
         
-        ######
+        if r1 and r2:
+            agg_rel['max_cost'] = max(r1['cost'], r2['cost'])
+            agg_rel['min_cost'] = min(r1['cost'], r2['cost'])
+            agg_rel['double_verified'] = r1['verified'] and r2['verified']
         
-        max_cost = max(r1['cost'], r2['cost'])
-        min_cost = min(r1['cost'], r2['cost'])
-        
-        block1 = graph.match(source, "BLOCK", target)
-        block2 = graph.match(target, "BLOCK", source)
-        is_blocked = len(list(block1)) + len(list(block2)) > 0
-        
-        verified = r1['verified'] and r2['verified']
-        
-        ######
-        
-        agg_rel = graph.match_one(source, "IS_CONNECTED", target)
-        #if list(agg_rel)>0:
-        if agg_rel:
-            agg_rel['max_cost'] = max_cost
-            agg_rel['min_cost'] = min_cost
-            agg_rel['blocked'] = is_blocked
-            agg_rel['double_verified'] = verified
-            graph.push(agg_rel)
-        else:
-            agg_rel = Relationship(source, "IS_CONNECTED", target, 
-                max_cost=max_cost, 
-                min_cost=min_cost,
-                blocked=is_blocked,
-                double_verified=verified)
+        if create:
             graph.create_unique(agg_rel)
+        else:
+            graph.push(agg_rel)
+            
         print "AGGREL"
         print agg_rel
         
