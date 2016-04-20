@@ -431,6 +431,8 @@ class User(SimpleNode):
                     #    p,q = rel.nodes
                     p,q = rel.nodes
                     if not path:
+                        if q['agent_name'] = self.agent_name
+                            p,q = q,p
                         path =[p,q]
                         path_names = [p.ref, q.ref]
                     else:
