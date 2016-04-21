@@ -232,13 +232,19 @@ def logout():
     
 @app.route('/add_inventory', methods=['POST'])
 def add_inventory():
-    type = request.form['type']
-    level = request.form['level']
-    value = int(request.form['value'])
+    type = request.form.get('type')
+    level = request.form.get('level')
+    value = request.form.get('value')
 
     if not type or not level:
         flash('You must specify item type and level.')
     else:
+        try:
+            int(value)
+        except:
+            flash('"{}" is not a valid "amount." Please enter an integer value for "amount."'.format(value))
+            return redirect(url_for('update_inventory'))
+        value = int(value)
         User(session['groupme_id']).inventory.set(type=type, level=level, value=value)
 
     return redirect(url_for('update_inventory'))
