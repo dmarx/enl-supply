@@ -51,9 +51,22 @@
             <option rel="discrete" value="c">Common</option>
             <option rel="discrete" value="r">Rare</option>
             <option rel="discrete" value="vr">Very Rare</option>
-            <option rel="discrete" value="sp">Special (AXA/Lawson/SBUL)</option>
+            <option rel="discrete" value="sp">Special (AXA/SBUL)</option>
             <!---->
             <option rel="virus" value="vr">Very Rare</option>
+            <!---->
+            <option rel="pc" value="1">1</option>
+            <option rel="pc" value="2">2</option>
+            <option rel="pc" value="3">3</option>
+            <option rel="pc" value="4">4</option>
+            <option rel="pc" value="5">5</option>
+            <option rel="pc" value="6">6</option>
+            <option rel="pc" value="7">7</option>
+            <option rel="pc" value="8">8</option>
+            <option rel="pc" value="lawson">Lawson</option>
+            <!---->
+            <option rel="cap" value="c">Common</option>
+            <option rel="cap" value="mufg">MUFG</option>
           </select>
         </td>
       </tr>
@@ -83,10 +96,12 @@
         $subcat.find("option").attr("style","");
         $subcat.val("");
         if(!_rel) return $subcat.prop("disabled",true);
-        if( (['xmp','res','pc','us'].indexOf(_rel) > -1) ){
+        if( (['xmp','res','us'].indexOf(_rel) > -1) ){
           var _cat = 'numeric';
         } else if (['ada','jarvis'].indexOf(_rel) > -1){
           var _cat = 'virus';
+        } else if (['pc','cap'].indexOf(_rel) > -1){
+            var _cat = _rel;
         } else {
           var _cat = 'discrete';
         }
