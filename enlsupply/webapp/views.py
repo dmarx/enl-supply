@@ -82,10 +82,12 @@ def connections():
     if session.has_key('username'):
         user = User(session['groupme_id'])
         sugg = ConnectionSuggesterGM(session['groupme_id'], session['groupme_token'])
-        verified_neighbors = sorted(sugg.user.verified_neighbors(), key=lambda rec: rec[0]['agent_name'].lower())
+        verified_neighbors   = sorted(sugg.user.verified_neighbors(),   key=lambda rec: rec[0]['agent_name'].lower())
+        unverified_neighbors = sorted(sugg.user.unverified_neighbors(), key=lambda rec: rec[0]['agent_name'].lower())
         suggestions = sugg.new_connections()
         return render_template('connections.html', 
-                               verified_neighbors=verified_neighbors,
+                               verified_neighbors   = verified_neighbors,
+                               unverified_neighbors = unverified_neighbors,
                                suggestions=suggestions) 
     else:
         return redirect(url_for('index'))
@@ -188,6 +190,33 @@ def _submit_new_connections():
                 io_verif_fail.append(id)
     return redirect(url_for('connections'))
     
+@app.route('/_verify_connections', methods=['POST','GET'])
+def _verify_connections():
+    print "Modifications recieved"
+    print request.form['btn']
+    if request.form['btn'] != 'Verify Connections':
+        return redirect(url_for('connections'))
+    access_token = request.args.get('access_token')
+    gm = GroupmeUser(access_token)
+    user = User(session['groupme_id'])
+    
+    for k, v in request.form.iteritems():
+        if k == 'btn' or not v:
+            continue
+        action, id = k.split('_')
+        print action, id, v
+        
+        if action == 'verify': 
+            user.set_user_relationship(target=User(groupme_id=id).node, 
+                                       cost=int(v), 
+                                       verified=True, 
+                                       override=True)
+            
+        if action == 'block': # Disconnect and block all routes through node. Register an alarm of some kind.
+            user.block(groupme_id=id)
+    
+    return redirect(url_for('connections'))
+    
 @app.route('/_modify_connections', methods=['POST','GET'])
 def _modify_connections():
     print "Modifications recieved"
@@ -205,22 +234,13 @@ def _modify_connections():
         print action, id, v
         
         if action == 'mod': # Modify cost of an existing connection
-            # This function probably shouldn't be attached to the class like this.
-            #user.set_user_relationship(source=user.node, target=User(id).node,
-            #                           cost=int(v),
-            #                           verified=True, 
-            #                           override=True)
             user.modify_verified_relationship(groupme_id=id, cost=int(v))
-                                       
-            ### If reverse relationship is unverified, this modification action
-            ### should update the cost on the unverified relationship as well.
         
         if action == 'disconn': # Disconnect from node. Should only be available if no other/inbound verified relationships to node
             user.disconnect(groupme_id=id)
             
         if action == 'block': # Disconnect and block all routes through node. Register an alarm of some kind.
             user.block(groupme_id=id)
-        
     
     return redirect(url_for('connections'))
     

@@ -16,50 +16,13 @@
   
   {% set convenience_map = dict(conv_map_tuples) %}
   
-  <h3>Connections</h3>
-    {% if verified_neighbors %}
-    <form id="confirmed_connections" name="confirmed_connections" method="post" action="{{ url_for('_modify_connections') }}">
-        <input type="submit" name="btn" value="Modify Connections">
-        <table class="scroll">
-            <thead>
-                <tr>
-                    <th>Agent</th>
-                    <th>Current Convenience</th>
-                    <th>Modify Convenience</th>
-                    <th>Disconnect</th>
-                    <th>Block</th>
-                </tr>
-            </thead>
-            <tbody class="scroll">
-            {% for agent, path in verified_neighbors %}
-              <tr>
-                <td> <a href="{{ url_for('profile', agent_name=agent.agent_name) }}">{{ agent.agent_name }}</a> </td>
-                <td> {{ convenience_map[path.cost] }} </td>
-                
-                <td>
-                  <select name="mod_{{ agent.groupme_id }}">
-                    <option value></option>
-                    {% for val,descr in conv_map_tuples %}
-                      <option value={{val}}>{{descr}}</option>
-                    {% endfor %}
-                  </select>
-                </td>
-                
-                <td>
-                <input type="checkbox" class="disconnect_chk" name="disconn_{{ agent.groupme_id }}">
-                </td>
-                <td>
-                <input type="checkbox" class="block_chk" name="block_{{ agent.groupme_id }}">
-                </td>
-              </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </form>
-    {% else %}
-      You currently are not connected to any other agents. Register connections
-      to agents you can easily meet with for gear exchange suggestions.
-    {% endif %}
+  {% if verified_neighbors %}
+    {% include "list_verified_connections.html" %}
+  {% endif %}
+  
+  {% if unverified_neighbors %}
+    {% include "list_unverified_connections.html" %}
+  {% endif %}
   
   <!-- This should probably be a separate template -->
   <h3>Suggested Connections</h3>

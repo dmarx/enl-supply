@@ -1,0 +1,45 @@
+<h3>Unverified connections</h3>
+    {% if unverified_neighbors %}
+    
+    The following agents have connected to you. You should confirm their connection 
+    to you (feel free to specify a different level of convenience than they did) or
+    block their connection to you. Blocking will prevent them from having any insight 
+    into your inventory. 
+    
+    <form id="unverified_connections" name="unverified_connections" method="post" action="{{ url_for('_verify_connections') }}">
+        <input type="submit" name="btn" value="Verify Connections">
+        <table class="scroll">
+            <thead>
+                <tr>
+                    <th>Agent</th>
+                    <th>Convenience They Reported</th>
+                    <th>Your Convenience</th>
+                    <th>Block</th>
+                </tr>
+            </thead>
+            <tbody class="scroll">
+            {% for agent, path in unverified_neighbors %}
+              <tr>
+                <td> <a href="{{ url_for('profile', agent_name=agent.agent_name) }}">{{ agent.agent_name }}</a> </td>
+                <td> {{ convenience_map[path.cost] }} </td>
+                
+                <td>
+                  <select name="verify_{{ agent.groupme_id }}">
+                    <option value></option>
+                    {% for val,descr in conv_map_tuples %}
+                      <option value={{val}}>{{descr}}</option>
+                    {% endfor %}
+                  </select>
+                </td>
+                
+                <td>
+                <input type="checkbox" class="block_chk" name="block_{{ agent.groupme_id }}">
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </form>
+    {% else %}
+      You have no unverified connections.
+    {% endif %}
