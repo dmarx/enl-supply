@@ -71,15 +71,18 @@ g, attr_d = generate_transport_problem()
     #node = Node("User", username=n)
     #graph.create(node)
     
+hrs = [6, 12, 24, 48, 72, 7*24, 14*24]
 for p,q in g.edges():
-    #src = graph.find_one("User", "username", p)
-    #tgt = graph.find_one("User", "username", q)
-    #rel = Relationship(src, "CAN_REACH", tgt)
-    #graph.create(rel)
-    user = User(p)
-    user.register('fakepass')
-    user.add_verified_relationship(q,cost=1)
+    user_p = User(groupme_id = str(p), agent_name = 'agent_'+str(p))
+    user_q = User(groupme_id = str(q), agent_name = 'agent_'+str(q))
+    c = random.choice(hrs)
+    user_p.add_verified_relationship(q,cost=c, default_cost=c)
+    # This approach will result in no double verified edges
     
+from views import item_map
+# We should have an object somewhere that specifies what levels are associated with what items, instead of 
+# the hacky bullshit we're doing in the view. Could even just do this as a separate script.
+#... oh shit, I sure hope I'm not on the master branch right now.
 for a,d in attr_d.iteritems():
     for u,v in d.iteritems():
         #inv = Node("Item", type=a, value=v, level=8)
