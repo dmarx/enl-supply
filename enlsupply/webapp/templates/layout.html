@@ -5,9 +5,9 @@
  http://stackoverflow.com/questions/11665401/jinja-is-there-any-built-in-variable-to-get-current-html-page-name 
  -->
  
-{% macro render_sitem(endpnt='', disp='', cls='', icon_cls='', active='') %}
-    <li {% if request.endpoint == endpnt or active == endpnt %} class='active' {% endif %}>
-        <a class='{{cls}}' href="{{url_for(endpnt)}}"><i class="{{icon_cls}}"></i> {{disp}}</a>
+{% macro render_sitem(endpoint='', display='', cls='', icon_cls='', active='') %}
+    <li {% if request.endpoint == endpoint or active == endpoint %} class='active' {% endif %}>
+        <a class='{{cls}}' href="{{url_for(endpoint)}}"><i class="{{icon_cls}}"></i> {{display}}</a>
     </li>
 {% endmacro %}
 
@@ -60,8 +60,8 @@
       <div id="navbar" class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
           <li name="index"><a href="{{ url_for('index') }}">Home</a></li>
-          {{render_sitem(endpoint='about',  display=_('About'), active=active_page, icon_cls='icon-sitemap')}}
-          {{render_sitem(endpoint='update_inventory',  display=_('Inventory'), active=active_page, icon_cls='icon-sitemap')}}
+          {{render_sitem(endpoint='about',  display='About', active=active_page, icon_cls='icon-sitemap')}}
+          {{render_sitem(endpoint='update_inventory',  display='Inventory', active=active_page, icon_cls='icon-sitemap')}}
           <li name="conn"><a href="{{ url_for('connections') }}">Connections</a></li>
           <li name="supply"><a href="{{ url_for('supply_me') }}">Supply Me</a></li>
           <li name="unload"><a href="{{ url_for('unload_me') }}">Unload Me</a></li>
