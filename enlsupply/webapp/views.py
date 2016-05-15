@@ -132,6 +132,12 @@ def _groupme_callback():
     access_token = request.args.get('access_token')
     gm = GroupmeUser(access_token)
     username = verify_agent(id=gm.id, token=app_token, service='groupme')
+    if app.debug and not username:
+        # hack info to allow for offline development. I feel like this is 
+        # probably a sort of dangerous way of doing this.
+        username = 'DEBUGGING_USER'
+        gm.id = -1
+        gm.nickname = username
     if not username:
         flash('Invalid login.')
         if access_token:

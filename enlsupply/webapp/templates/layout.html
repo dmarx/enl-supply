@@ -1,6 +1,16 @@
 <!doctype html>
 <head>
 
+<!-- via 
+ http://stackoverflow.com/questions/11665401/jinja-is-there-any-built-in-variable-to-get-current-html-page-name 
+ -->
+ 
+{% macro render_sitem(endpnt='', disp='', cls='', icon_cls='', active='') %}
+    <li {% if request.endpoint == endpnt or active == endpnt %} class='active' {% endif %}>
+        <a class='{{cls}}' href="{{url_for(endpnt)}}"><i class="{{icon_cls}}"></i> {{disp}}</a>
+    </li>
+{% endmacro %}
+
   <script type=text/javascript>
       $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
     </script>
@@ -49,12 +59,12 @@
       {% if session.username %}
       <div id="navbar" class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
-          <li class="active"><a href="{{ url_for('index') }}">Home</a></li>
-          <li><a href="{{ url_for('about') }}">About</a></li>
-          <li><a href="{{ url_for('update_inventory') }}">Inventory</a></li>
-          <li><a href="{{ url_for('connections') }}">Connections</a></li>
-          <li><a href="{{ url_for('supply_me') }}">Supply Me</a></li>
-          <li><a href="{{ url_for('unload_me') }}">Unload Me</a></li>
+          <li name="index"><a href="{{ url_for('index') }}">Home</a></li>
+          {{render_sitem(endpoint='about',  display=_('About'), active=active_page, icon_cls='icon-sitemap')}}
+          {{render_sitem(endpoint='update_inventory',  display=_('Inventory'), active=active_page, icon_cls='icon-sitemap')}}
+          <li name="conn"><a href="{{ url_for('connections') }}">Connections</a></li>
+          <li name="supply"><a href="{{ url_for('supply_me') }}">Supply Me</a></li>
+          <li name="unload"><a href="{{ url_for('unload_me') }}">Unload Me</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
           <li><a>Logged in as {{ session.username }}</a></li>          
@@ -71,6 +81,9 @@
  
   {% block body %}{% endblock %}
 </div>
+
+<!-- Set active state from template name -->
+
 
   <script 
     src="https://code.jquery.com/jquery-2.2.3.min.js"
