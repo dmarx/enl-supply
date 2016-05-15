@@ -59,12 +59,12 @@
       {% if session.username %}
       <div id="navbar" class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
-          <li name="index"><a href="{{ url_for('index') }}">Home</a></li>
+          {{render_sitem(endpoint='index',  display='Home', active=active_page, icon_cls='icon-sitemap')}}
           {{render_sitem(endpoint='about',  display='About', active=active_page, icon_cls='icon-sitemap')}}
           {{render_sitem(endpoint='update_inventory',  display='Inventory', active=active_page, icon_cls='icon-sitemap')}}
-          <li name="conn"><a href="{{ url_for('connections') }}">Connections</a></li>
-          <li name="supply"><a href="{{ url_for('supply_me') }}">Supply Me</a></li>
-          <li name="unload"><a href="{{ url_for('unload_me') }}">Unload Me</a></li>
+          {{render_sitem(endpoint='connections',  display='Connections', active=active_page, icon_cls='icon-sitemap')}}
+          {{render_sitem(endpoint='supply_me',  display='Supply Me', active=active_page, icon_cls='icon-sitemap')}}
+          {{render_sitem(endpoint='unload_me',  display='Unload Me', active=active_page, icon_cls='icon-sitemap')}}
         </ul>
         <ul class="nav navbar-nav navbar-right">
           <li><a>Logged in as {{ session.username }}</a></li>          
