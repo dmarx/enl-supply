@@ -6,7 +6,7 @@
   {% include "list_current_inventory.html" %}
   
   <h3>Supply lines</h3>
-  <table class="inventory">
+  <table class="table">
     <thead>
       <tr>
         <th>User</th>
@@ -20,7 +20,7 @@
 
       <td> {{ rec.terminus.agent_name}} </td>
       <td>
-        <table>
+        <table class="table">
           {% for item in rec.inventory%}
             <tr>
               <td>{{ item.type  }}</td>
