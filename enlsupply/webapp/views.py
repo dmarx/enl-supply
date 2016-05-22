@@ -8,6 +8,7 @@ import os
 from ConfigParser import ConfigParser
 from collections import OrderedDict
 #from flask_oauth import OAuth
+import requests
 
 config = ConfigParser()
 config.read('settings.cfg')
@@ -130,8 +131,18 @@ def about():
 @app.route('/_groupme_callback', methods=['GET'])   
 def _groupme_callback():
     access_token = request.args.get('access_token')
-    gm = GroupmeUser(access_token)
-    username = verify_agent(id=gm.id, token=app_token, service='groupme')
+    try:
+        gm = GroupmeUser(access_token)
+        username = verify_agent(id=gm.id, token=app_token, service='groupme')
+    except requests.ConnectionError, e:
+        if app.debug:
+            from collections import namedtuple
+            gm = namedtuple('GroupmeUser', ['id', 'nickname'])
+            username = 'DEBUGGING_USER'
+            gm.id = -1
+            gm.nickname = username
+        else:
+            raise e
     if not username:
         flash('Invalid login.')
         if access_token:
