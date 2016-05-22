@@ -1,4 +1,33 @@
+{% include "header.html" %}
+
 {% block body %}
-  <h2>Login with groupme</h2>
-    Visit <a href='https://oauth.groupme.com/oauth/authorize?client_id=7vA1JCzfZ4ajzsG2Oxhp65pXMQ0BGGlWfKR0J9wkOzr0yc3o'>groupme</a> to login.
+
+<style>
+body {
+	background-image: url("https://media.giphy.com/media/b5hhWE7bB6CAM/giphy.gif");
+    background-position:center;
+}
+
+ html, body, .container-table {
+    height: 100%;
+}
+.container-table {
+    display: table;
+}
+.vertical-center-row {
+    display: table-cell;
+    vertical-align: middle;
+}
+</style>
+
+<div class="container container-table">
+    <div class="row vertical-center-row">
+        <div class="text-center col-md-4 col-md-offset-4">
+            <h2 style="color:light green;">Welcome ENL</h2>
+            <a class="btn btn-primary" href='https://oauth.groupme.com/oauth/authorize?client_id=7vA1JCzfZ4ajzsG2Oxhp65pXMQ0BGGlWfKR0J9wkOzr0yc3o' role="button">Login with GroupMe</a>
+        </div>
+    </div>
+</div>
+
+  
 {% endblock %}

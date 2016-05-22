@@ -1,9 +1,8 @@
-{% set active_page = 'index' %} 
-
-{% extends "layout.html" %}
-{% block body %}
-
   {% if session.username %}
+    {% set active_page = 'index' %} 
+    {% extends "layout.html" %}
+    {% block body %}
+
     <div align="center">
     <img src="static/images/enlsupply_logo.png" width="200" height="200"/>
     </div>
@@ -26,7 +25,8 @@
       At cap? Don't recycle that gear, these agents need it!
       <br><br>
     <h3><a href="{{ url_for('about') }}">About</a></h3>
+
+    {% endblock %}
   {% else %}
     {% include "login.html" %}
   {% endif %}
-{% endblock %}
