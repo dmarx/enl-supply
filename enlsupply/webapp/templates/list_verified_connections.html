@@ -2,7 +2,7 @@
     {% if verified_neighbors %}
     <form id="confirmed_connections" name="confirmed_connections" method="post" action="{{ url_for('_modify_connections') }}">
         <input type="submit" name="btn" value="Modify Connections">
-        <table class="scroll">
+        <table class="scroll table table-striped">
             <thead>
                 <tr>
                     <th>Agent</th>
