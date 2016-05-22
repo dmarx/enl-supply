@@ -49,7 +49,9 @@ def index():
         groupme_id = session['groupme_id']
         inventory = [{'type':k[0], 'level':k[1], 'value':v['value']} 
                      for k,v in Inventory(pk=groupme_id, pk_name="groupme_id").nodes.iteritems()]
-    return render_template('index.html', inventory=inventory)
+        return render_template('index.html', inventory=inventory)
+    else:
+        return render_template('login.html')
     
 item_map = {"xmp":'XMP Bursters',
             "sh":'Shields',

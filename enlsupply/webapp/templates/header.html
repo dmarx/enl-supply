@@ -3,12 +3,6 @@
 <!-- via 
  http://stackoverflow.com/questions/11665401/jinja-is-there-any-built-in-variable-to-get-current-html-page-name 
  -->
- 
-{% macro render_sitem(endpoint='', display='', cls='', icon_cls='', active='') %}
-    <li {% if request.endpoint == endpoint or active == endpoint %} class='active' {% endif %}>
-        <a class='{{cls}}' href="{{url_for(endpoint)}}"><i class="{{icon_cls}}"></i> {{display}}</a>
-    </li>
-{% endmacro %}
 
   <script type=text/javascript>
       $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};

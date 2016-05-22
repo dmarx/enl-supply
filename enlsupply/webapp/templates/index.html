@@ -1,7 +1,10 @@
-  {% if session.username %}
-    {% set active_page = 'index' %} 
-    {% extends "layout.html" %}
+{% extends "layout.html" %}
+{% set active_page = 'index' %} 
+    
     {% block body %}
+
+  {% if session.username %}
+    
 
     <div align="center">
     <img src="static/images/enlsupply_logo.png" width="200" height="200"/>
@@ -26,7 +29,7 @@
       <br><br>
     <h3><a href="{{ url_for('about') }}">About</a></h3>
 
-    {% endblock %}
   {% else %}
     {% include "login.html" %}
   {% endif %}
+{% endblock %}
